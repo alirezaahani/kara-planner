@@ -1,0 +1,249 @@
+{% extends 'dashboard/common.html' %}
+{% set active_page = 'percentage' %}
+
+
+{% block title %}محاسبه درصد{% endblock %}
+{% block header %}محاسبه درصد{% endblock %}
+
+{% block toolbar %}
+{% endblock %}
+
+{% block content %}
+
+<div class="accordion accordion-flush" id="accordionPercentage">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="simple">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                aria-expanded="true" aria-controls="collapseOne">
+                محاسبه گر ساده
+            </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="simple"
+            data-bs-parent="#accordionPercentage">
+            <div class="accordion-body">
+                <div class="row">
+                    <div class="col">
+                        <div class="input-group">
+                            <label class="input-group-text col-form-label bg-success text-light"
+                                for="correct-count">صحیح</label>
+                            <input class="form-control text-center simple-precentage" type="tel" id="correct-count"
+                                name="correct-count">
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="input-group">
+                            <label class="input-group-text col-form-label text-light bg-danger">غلط</label>
+                            <input class="form-control text-center simple-precentage" type="tel" id="mistake-count"
+                                name="mistake-count">
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="input-group">
+                            <label class="input-group-text col-form-label text-dark bg-warning">نزده</label>
+                            <input class="form-control text-center simple-precentage" type="tel" id="not-awnsered-count"
+                                name="not-awnsered-count">
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="alert alert-secondary text-center">
+                            <h4>
+                                درصد : <span class="badge bg-primary" id="percentage">0</span>
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="alert alert-secondary text-center">
+                            <h4>
+                                درصد بدون نمره منفی : <span class="badge bg-primary" id="raw-precentage">0</span>
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="alert alert-secondary text-center">
+                            <h4>
+                                تعداد کل سوالات : <span class="badge bg-primary" id="question-count">0</span>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="advanced">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                محاسبه گر پیشرفته
+            </button>
+        </h2>
+        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="advanced"
+            data-bs-parent="#accordionPercentage">
+            <div class="accordion-body">
+                <div class="btn-group" role="group">
+                    <button id="add-lessons" type="button" class="btn btn-primary">افزودن درس</button>
+                    <button id="calculate" type="button" class="btn btn-primary">محاسبه درصد ها</button>
+                </div>
+
+                <div id="lessons"></div>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="alert alert-secondary text-center">
+                            <h4>
+                                درصد : <span class="badge bg-primary" id="advanced-percentage">0</span>
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="alert alert-secondary text-center">
+                            <h4>
+                                درصد بدون نمره منفی : <span class="badge bg-primary"
+                                    id="advanced-raw-precentage">0</span>
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="alert alert-secondary text-center">
+                            <h4>
+                                تعداد کل سوالات : <span class="badge bg-primary" id="advanced-question-count">0</span>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block code %}
+
+<script>
+
+    function calculatePrecentage(cntCorrect, cntMistake, cntNoAnswer) {
+        totalQuestion = (cntCorrect + cntMistake + cntNoAnswer);
+        totalPercent = ((((cntCorrect * 3) - cntMistake) / (totalQuestion * 3)) * 100).toFixed(1);
+        withoutMistakePercent = ((cntCorrect / totalQuestion) * 100).toFixed(1);
+
+        return [totalQuestion, totalPercent, withoutMistakePercent];
+    }
+
+    const elements = document.querySelectorAll('.simple-precentage');
+    elements.forEach((element) => {
+        element.addEventListener('keyup', (event) => {
+            let totalPercent;
+            let withoutMistakePercent;
+            let totalQuestion;
+            let cntCorrect = parseInt(document.querySelector('#correct-count').value);
+            let cntMistake = parseInt(document.querySelector('#mistake-count').value);
+            let cntNoAnswer = parseInt(document.querySelector('#not-awnsered-count').value);
+
+            if ((cntCorrect >= 0) && (cntMistake >= 0) && (cntNoAnswer >= 0)) {
+                const [totalQuestion, totalPercent, withoutMistakePercent] = calculatePrecentage(cntCorrect, cntMistake, cntNoAnswer);
+
+                document.querySelector('#percentage').innerText = ('% ' + totalPercent);
+                document.querySelector('#raw-precentage').innerText = ('% ' + withoutMistakePercent);
+                document.querySelector('#question-count').innerText = (totalQuestion);
+            }
+
+            if ((cntCorrect == 0) && (cntMistake == 0) && (cntNoAnswer == 0)) {
+                document.querySelector('#percentage').innerText = ('% ' + 0);
+                document.querySelector('#raw-precentage').innerText = ('% ' + 0);
+                document.querySelector('#question-count').innerText = (0);
+            }
+        })
+    })
+
+
+    window.lessons = 0
+
+    document.querySelector('#add-lessons').addEventListener('click', function addLesson(event) {
+        let template = `
+        <div class="row mb-1 mt-1 lesson" id='lesson-${window.lessons}' lesson-id="${window.lessons}">
+            <div class="col">
+                <div class="input-group">
+                    <label class="input-group-text col-form-label bg-dark text-light"
+                        for="correct-count">ضریب</label>
+                    <input class="form-control text-center simple-precentage" type="tel" id="coefficent-${window.lessons}"
+                        name="correct-count">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group">
+                    <label class="input-group-text col-form-label bg-success text-light"
+                        for="correct-count">صحیح</label>
+                    <input class="form-control text-center simple-precentage" type="tel" id="correct-count-${window.lessons}"
+                        name="correct-count">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group">
+                    <label class="input-group-text col-form-label text-light bg-danger">غلط</label>
+                    <input class="form-control text-center simple-precentage" type="tel" id="mistake-count-${window.lessons}"
+                        name="mistake-count">
+                </div>
+            </div>
+            <div class="col">
+                <div class="input-group">
+                    <label class="input-group-text col-form-label text-dark bg-warning">نزده</label>
+                    <input class="form-control text-center simple-precentage" type="tel" id="not-awnsered-count-${window.lessons}"
+                        name="not-awnsered-count">
+                </div>
+            </div>
+            <div class="col">
+                <button type="button" class="btn btn-primary" id="delete-${window.lessons}" onclick='document.querySelector("#lesson-${window.lessons}").remove()'>حدف درس</button>
+            </div>
+        </div>
+        `
+        document.querySelector('#lessons').innerHTML += template;
+
+        window.lessons++;
+    })
+
+
+    document.querySelector('#calculate').addEventListener('click', function calculate(event) {
+        const lessons = document.querySelectorAll('.lesson')
+
+        let totalPercents = [];
+        let withoutMistakePercents = [];
+        let totalQuestions = [];
+        let coefficents = [];
+
+        lessons.forEach((lesson) => {
+            const id = (lesson.getAttribute('lesson-id'))
+            const coefficent = parseInt(document.querySelector(`#coefficent-${id}`).value)
+            const cntCorrect = parseInt(document.querySelector(`#correct-count-${id}`).value)
+            const cntMistake = parseInt(document.querySelector(`#mistake-count-${id}`).value)
+            const cntNoAnswer = parseInt(document.querySelector(`#not-awnsered-count-${id}`).value)
+
+            const [totalQuestion, totalPercent, withoutMistakePercent] = calculatePrecentage(cntCorrect, cntMistake, cntNoAnswer)
+
+            totalPercents.push(totalPercent)
+            withoutMistakePercents.push(withoutMistakePercent)
+            totalQuestions.push(totalQuestion)
+            coefficents.push(coefficent)
+        })
+
+        const totalCoefficent = coefficents.reduce((a, b) => a + b, 0);
+        const totalPercent = totalPercents.map((v, i) => v * coefficents[i]).reduce((a, b) => a + b, 0) / totalCoefficent;
+        const withoutMistakePercent = withoutMistakePercents.map((v, i) => v * coefficents[i]).reduce((a, b) => a + b, 0) / totalCoefficent;
+        const totalQuestion = totalQuestions.reduce((a, b) => a + b, 0);
+
+        document.querySelector('#advanced-percentage').innerText = ('% ' + totalPercent);
+        document.querySelector('#advanced-raw-precentage').innerText = ('% ' + withoutMistakePercent);
+        document.querySelector('#advanced-question-count').innerText = (totalQuestion);
+    })
+
+</script>
+
+{% endblock %}

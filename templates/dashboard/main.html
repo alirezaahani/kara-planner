@@ -1,0 +1,110 @@
+{% extends 'dashboard/common.html' %}
+{% set active_page = 'main' %}
+
+
+{% block title %}صفحه اصلی{% endblock %}
+{% block header %}صفحه اصلی{% endblock %}
+{% block content %}
+<h2>برنامه ریزی امروز</h2>
+<div id="visualization"></div>
+
+<br>
+
+<h2>اهداف</h2>
+
+<div class="table-responsive">
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">موعد</th>
+        <th scope="col">توضیحات</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for goal in week_goals %}
+      <tr>
+        <td>{{ goal.id }}</td>
+        <td id="goal-{{ goal.id }}">
+        </td>
+        <td>{{ goal.description }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block code %}
+<script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
+<link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
+
+
+{% for goal in week_goals %}
+
+<script>
+  document.querySelector("#goal-{{ goal.id }}").innerText = moment("{{ goal.deadline }}").locale('fa').format('YYYY/MM/DD hh:mm')
+</script>       
+
+{% endfor %}
+
+<style>
+  .vis-item.sleep {
+    background-color: #666DCB;
+    color: #fff;
+  }
+  .vis-item.study {
+    background-color: #3ABBC9;
+    color: #fff;
+  }
+  .vis-item.work {
+    background-color: #9BCA3E;
+    color: #222;
+  }
+  .vis-item.break {
+    background-color: #FEEB51;
+    color: #222;
+  }
+  .vis-item.exercise {
+    background-color: #FFB92A;
+    color: #222;
+  }
+  .vis-item.other {
+    background-color: #ED5314;
+    color: #fff;
+  }
+</style>
+
+<script>
+  let container = document.querySelector('#visualization')
+
+  let server_data = {{ today_schedules|safe }}
+
+  server_data = server_data.map((entry) => {
+    return {
+      start: new Date(entry['start'] * 1000),
+      end: new Date(entry['end'] * 1000),
+      content: entry['description'],
+      id: entry['id'],
+      className: entry['type'].toLowerCase()
+    }
+  })
+
+  let items = new vis.DataSet(server_data)
+
+  let now = new Date();
+
+  let options = {
+    min: now.setHours(0, 0, 0, 0),
+    max: now.setHours(23, 59, 59),
+    rtl: true,
+    locale: 'fa',
+    timeAxis: {
+      scale: 'minute', step: 15
+    }
+  }
+
+  let timeline = new vis.Timeline(container, items, options)
+
+</script>
+{% endblock %}

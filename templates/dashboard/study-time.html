@@ -1,0 +1,47 @@
+{% extends 'dashboard/common.html' %}
+{% set active_page = 'study_time' %}
+
+
+{% block title %}ساعت مطالعه هفتگی{% endblock %}
+{% block header %}ساعت مطالعه هفتگی{% endblock %}
+
+{% block toolbar %}
+{% endblock %}
+
+{% block content %}
+<canvas id="study-chart"></canvas>
+{% endblock %}
+
+{% block code %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const ctx = document.getElementById('study-chart');
+
+  Chart.defaults.font.family = "Vazirmatn"
+
+  let server_data = {{ labels|safe }};
+  server_data = server_data.map((v, i) => {
+    return moment(v, 'YYYY/MM/DD').locale('fa').format('YYYY/MM/DD');
+  })
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: server_data,
+      datasets: [{
+        label: 'ساعت مطالعه',
+        data: {{ data|safe }},
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      },
+    }
+  });
+</script>
+{% endblock %}

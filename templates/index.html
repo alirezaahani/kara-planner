@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>سامانه کارا ::‌ صفحه اصلی</title>
+
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.rtl.min.css"
+    integrity="sha384-WJUUqfoMmnfkBLne5uxXj+na/c7sesSJ32gI7GfCk4zO4GthUKhSEGyvQ839BC51" crossorigin="anonymous">
+
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet"
+    type="text/css" />
+
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
+</head>
+
+<body>
+
+  <header class="site-header sticky-top py-1">
+    <nav class="container d-flex flex-column flex-md-row justify-content-between">
+
+      <a class="py-2 d-none d-md-inline-block" href="#">ویژگی ها</a>
+      <a class="py-2 d-none d-md-inline-block" href="{{ url_for('login.show') }}">ورود</a>
+      <a class="py-2 d-none d-md-inline-block" href="{{ url_for('register.show') }}">ثبت نام</a>
+      <a class="py-2 d-none d-md-inline-block" href="{{ url_for('support.show') }}">تماس با ما</a>
+
+    </nav>
+  </header>
+
+  <main>
+    <div class="position-relative overflow-hidden p-3 p-md-5 m-md-3 text-center bg-light ">
+      <div class="product-device shadow-sm d-none d-md-block"></div>
+      <div class="product-device product-device-2 shadow-sm d-none d-md-block"></div>
+      <div class="col-md-5 p-lg-5 mx-auto my-5 ">
+        <h1 class="display-4 fw-normal">سامانه کارا</h1>
+        <p class="lead fw-normal">با کارا، هوشمندانه و با برنامه ریزی درس بخون!</p>
+        <p class="lead fw-normal">سامانه ثبت گزارش کار، برنامه ریزی و کمک تحصیلی</p>
+        <a class="btn btn-outline-secondary" href="{{ url_for('login.show') }}">ورود دانش آموز</a>
+      </div>
+    </div>
+
+    <div class="d-md-flex flex-md-equal w-100 my-md-3 ps-md-3">
+      <div class="text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden"
+        style="border-radius: 21px; margin-bottom: 12px;">
+        <div class="my-3 py-3">
+          <h2 class="display-5">امکانات</h2>
+        </div>
+        <div class="text-bg-dark shadow-sm mx-auto" style="width: 80%; height: 300px;">
+          <ul class="list-group list-group-flush">
+            <li class="lead bg-dark text-light list-group-item">ابزار های برنامه ریزی</li>
+            <li class="lead bg-dark text-light list-group-item">رسم نمودار جهت بررسی و دنبال کردن وضعیت تحصیلی</li>
+            <li class="lead bg-dark text-light list-group-item">ثبت و بررسی نتایج آزمون های برگزار شده</li>
+          </ul>
+        </div>
+      </div>
+      <div class="text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden"
+        style="border-radius: 21px; margin-bottom: 12px;">
+        <div class="my-3 p-3">
+          <h2 class="display-5">ابزار های برنامه ریزی</h2>
+        </div>
+        <div class="bg-dark shadow-sm mx-auto" style="width: 80%; height: 300px;">
+          <ul class="list-group list-group-flush">
+            <li class="lead list-group-item bg-dark text-light">برنامه ریزی روزانه و ساعتی (‌کوتاه مدت)</li>
+            <li class="lead list-group-item bg-dark text-light">برنامه ریزی هفتگی (‌میان مدت)</li>
+            <li class="lead list-group-item bg-dark text-light">برنامه ریزی بلند مدت و هدف گزاری</li>
+          </ul>
+        </div>
+      </div>
+      <div class="text-bg-dark me-md-3 pt-3 px-3 pt-md-5 px-md-5 text-center overflow-hidden"
+        style="border-radius: 21px; margin-bottom: 12px;">
+        <div class="my-3 p-3">
+          <h2 class="display-5">ابزار های بررسی رشد تحصیلی</h2>
+        </div>
+        <div class="bg-dark shadow-sm mx-auto" style="width: 80%; height: 300px;">
+          <ul class="list-group list-group-flush">
+            <li class="lead list-group-item bg-dark text-light">رشد درصدی و ترازی در دروس</li>
+            <li class="lead list-group-item bg-dark text-light">رضد نمرات در آزمون های تشریحی</li>
+            <li class="lead list-group-item bg-dark text-light">بررسی نتایج و محاسبه درصد آزمون تستی</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+  </main>
+
+  <footer class="container py-5">
+    <div class="row">
+      <div class="col-12 col-md">
+        <small class="d-block mb-3 text-muted">&copy; 2023 - 2023</small>
+      </div>
+      <div class="col-6 col-md">
+        <h5>ابزار ها</h5>
+        <ul class="list-unstyled text-small">
+          <li><a class="link-secondary" href="#">برنامه ریزی</a></li>
+          <li><a class="link-secondary" href="#">گزارش کار</a></li>
+          <li><a class="link-secondary" href="#">هدف گذاری</a></li>
+          <li><a class="link-secondary" href="#">محاسبه درصد</a></li>
+          <li><a class="link-secondary" href="#">ساعت مطالعه</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-md">
+        <h5>درباره کارا</h5>
+        <ul class="list-unstyled text-small">
+          <li><a class="link-secondary" href="#">علیرضا آهنی</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+    crossorigin="anonymous"></script>
+
+
+</body>
+
+</html>
