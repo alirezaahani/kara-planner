@@ -1,49 +1,47 @@
 {% extends 'dashboard/common.html' %}
 {% set active_page = 'edit_today' %}
 
-{% block title %}ویرایش برنامه{% endblock %}
-{% block header %}ویرایش برنامه{% endblock %}
+{% block title %}ویرایش برنامه ریزی{% endblock %}
+{% block header %}ویرایش برنامه ریزی{% endblock %}
 {% block content %}
-<h3>برنامه ریزی های امروز</h3>
-<ul>
-  <li>برای افزودن یک برنامه جدید:‌ بر روی محور زمانی دوبار کلیک کنید.</li>
-  <li>برای حذف یک برنامه:‌ برنامه مورد نظر انتخاب کنید، و از دکمه X استفاده کنید.</li>
-  <li>برای ویرایش برنامه: برنامه مورد نظر انتخاب کنید، بر روی آن دوبار کلیک کنید.</li>
-  <li>برای تغییر مدت و زمان برنامه: برنامه مورد نظر انتخاب کنید، از سمت چپ یا راست بکشید یا خود برنامه را منتقل کنید.
-  </li>
-  <li>تغییرات به طور خودکار ذخیره میشوند.</li>
 
-</ul>
-<br>
-<div id="visualization"></div>
-
-
-<!-- Server modal -->
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="confirmModalLabel">تایید حذف</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<div class="accordion" id="accordionHelp">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="help">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+          data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+          توضحیات و راهنمایی
+      </button>
+  </h2>
+  <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="help"
+      data-bs-parent="#accordionHelp">
+      <div class="accordion-body">
+            <ul>
+              <li>برای افزودن یک برنامه جدید:‌ بر روی محور زمانی بکشید.</li>
+              <li>برای حذف یک برنامه:‌ برنامه مورد نظر انتخاب کنید، و از دکمه X استفاده کنید.</li>
+              <li>برای ویرایش برنامه: برنامه مورد نظر انتخاب کنید، بر روی آن کلیک کنید.</li>
+              <li>برای تغییر مدت و زمان برنامه: برنامه مورد نظر انتخاب کنید، از سمت چپ یا راست بکشید یا خود برنامه را منتقل کنید.
+              </li>
+              <li>تغییرات به طور خودکار ذخیره میشوند.</li>
+            
+            </ul>
+          </div>
       </div>
-      <div class="modal-body">
-        اطلاعات حذف شود؟
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="confirm">تایید</button>
-      </div>
-    </div>
   </div>
 </div>
 
+
+<br>
+
+<div id='calendar'></div>
+<br>
 
 <!-- Modal -->
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="scheduleModalLabel">افزودن/ویرایش برنامه</h1>
+        <h1 class="modal-title fs-5" id="scheduleModalLabel">تغییرات / افزودن</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form onsubmit="return false;">
@@ -66,7 +64,8 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="add">ذخیره</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="delete">حذف برنامه</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="add">ذخیره ویرایش</button>
         </div>
       </form>
     </div>
@@ -76,208 +75,214 @@
 {% endblock %}
 
 {% block code %}
-<script type="text/javascript"
-  src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
-<link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet"
-  type="text/css" />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 
-<style>
-  .vis-item.sleep {
-    background-color: #666DCB;
-    color: #eee;
-  }
-
-  .vis-item.study {
-    background-color: #3ABBC9;
-    color: #eee;
-  }
-
-  .vis-item.work {
-    background-color: #9BCA3E;
-    color: #222;
-  }
-
-  .vis-item.break {
-    background-color: #FEEB51;
-    color: #222;
-  }
-
-  .vis-item.exercise {
-    background-color: #FFB92A;
-    color: #222;
-  }
-
-  .vis-item.other {
-    background-color: #ED5314;
-    color: #eee;
-  }
-</style>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/fa.global.min.js"></script>
 
 <script>
-  let container = document.querySelector('#visualization')
-
   let server_data = {{ today_schedules| safe }}
 
   server_data = server_data.map((entry) => {
     return {
       start: new Date(entry['start'] * 1000),
       end: new Date(entry['end'] * 1000),
-      content: entry['description'],
+      title: entry['description'],
       id: entry['id'],
-      className: entry['type'].toLowerCase()
+      className: 'item-' + entry['type'].toLowerCase(),
     }
   })
 
-  let items = new vis.DataSet(server_data)
 
-  let now = new Date();
-  const min = now.setHours(0, 0, 0, 0);
-  const max = now.setHours(23, 59, 59);
+  document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'timeGridDay',
+      locale: 'fa',
+      events: server_data,
+      slotDuration: '00:15:00',
+      themeSystem: 'bootstrap5',
+      nowIndicator: true,
+      editable: true,
+      eventResizableFromStart: true,
+      selectable: true,
+      allDaySlot: false,
 
-  let options = {
-    min: min,
-    max: max,
-    rtl: true,
-    locale: 'fa',
-    timeAxis: {
-      scale: 'minute', step: 15
-    },
-    editable: true,
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
 
-    snap: function (date, scale, step) {
-      var hour = 60 * 60 * 250;
-      return Math.round(date / hour) * hour;
-    },
+      select: function (info) {
+        (new bootstrap.Modal('#scheduleModal', {})).show();
 
-    onMove: function (item, callback) {
-      callback(item)
+        const delete_btn = document.querySelector('#delete');
 
-      let formData = new FormData();
+        delete_btn.disabled = true;
 
-      formData.append('id', item['id']);
-      formData.append('start', item['start'].getTime());
-      formData.append('end', item['end'].getTime());
-      formData.append('description', item['content']);
-      formData.append('type', item['className'].toUpperCase());
+        document.querySelector('#add').addEventListener('click', (e) => {
+          const name = document.querySelector('#description');
+          const type = document.querySelector('#schedule-type');
 
-      fetch("{{ url_for('dashboard.update_schedule') }}", {
-        body: formData,
-        method: "post"
-      }).then(res => console.log(res.status))
-    },
+          if ((!name.value) || (!type.value)) {
+            delete_btn.disabled = false;
+            return
+          }
 
-    onMoving: function (item, callback) {
-      let now = new Date();
-      const min = now.setHours(0, 0, 0, 0);
-      const max = now.setHours(23, 59, 59);
+          let event = {};
 
-      if (item.start < min) item.start = min;
-      if (item.start > max) item.start = max;
-      if (item.end > max) item.end = max;
+          event['start'] = new Date(info['start'].getTime())
+          event['end'] = new Date(info['end'].getTime())
+          event['title'] = name.value;
+          event['classNames'] = ['item-' + type.value.toLowerCase()];
 
-      callback(item); // send back the (possibly) changed item
-    },
+          name.value = ''
+          
 
-    onAdd: function (item, callback) {
-      const btn = document.querySelector('#add');
-      const modal = new bootstrap.Modal('#scheduleModal', {});
-      modal.show();
+          let formData = new FormData();
+          formData.append('start', event['start'].getTime());
+          formData.append('end', event['end'].getTime());
+          formData.append('description', event['title']);
+          formData.append('type', event['classNames'][0].replace("item-", "").toUpperCase());
 
-      btn.addEventListener('click', (event) => {
-        const name = document.querySelector('#description');
-        const type = document.querySelector('#schedule-type');
-
-        if ((!name.value) || (!type.value)) {
-          return
-        }
-
-        item['end'] = new Date(item['start'].getTime() + 3600000)
-        item['content'] = name.value;
-        item['className'] = type.value.toLowerCase();
-
-        name.value = ''
-        type.value = ''
-
-        let formData = new FormData();
-        formData.append('start', item['start'].getTime());
-        formData.append('end', item['end'].getTime());
-        formData.append('description', item['content']);
-        formData.append('type', item['className'].toUpperCase());
-
-        const id = fetch("{{ url_for('dashboard.add_schedule') }}", {
-          body: formData,
-          method: "post"
-        })
-          .then(res => res.json())
-          .then(res => {
-            console.log(res['id'])
-            item['id'] = res['id']
-            callback(item)
+          const id = fetch("{{ url_for('dashboard.add_schedule') }}", {
+            body: formData,
+            method: "post"
           })
-      }, { once: true })
-    },
+            .then(res => res.json())
+            .then(res => {
+              console.log(res['id'])
+              event['id'] = res['id']
+              
+              delete_btn.disabled = false;
+              calendar.addEvent(event)
+            })
+        }, { once: true })
+      },
 
-    onUpdate: function (item, callback) {
-      const name = document.querySelector('#description');
-      const type = document.querySelector('#schedule-type');
-      name.value = item.content;
-      type.value = item.className.toUpperCase();
 
-      const btn = document.querySelector('#add');
-      const modal = new bootstrap.Modal('#scheduleModal', {});
-      modal.show();
-
-      btn.addEventListener('click', (event) => {
-        const name = document.querySelector('#description');
-        const type = document.querySelector('#schedule-type');
-
-        if ((!name.value) || (!type.value)) {
-          return
-        }
-
-        item['content'] = name.value;
-        item['className'] = type.value.toLowerCase();
-
-        name.value = ''
-        type.value = ''
-
-        callback(item)
-
+      eventResize: function (info) {
         let formData = new FormData();
 
-        formData.append('id', item['id']);
-        formData.append('start', item['start'].getTime());
-        formData.append('end', item['end'].getTime());
-        formData.append('description', item['content']);
-        formData.append('type', item['className'].toUpperCase());
+        formData.append('id', info.event['id']);
+        formData.append('start', info.event['start'].getTime());
+        formData.append('end', info.event['end'].getTime());
+        formData.append('description', info.event['title']);
+        formData.append('type', info.event['classNames'][0].replace("item-", "").toUpperCase());
 
         fetch("{{ url_for('dashboard.update_schedule') }}", {
           body: formData,
           method: "post"
-        }).then(res => console.log(res.status))
-      }, { once: true })
-    },
+        })
+      },
 
-    onRemove: function (item, callback) {
-      const btn = document.querySelector('#confirm');
-      const modal = new bootstrap.Modal('#confirmModal', {});
-      modal.show();
-
-      btn.addEventListener('click', (event) => {
+      eventDrop: function (info) {
         let formData = new FormData();
 
-        formData.append('id', item['id']);
-        fetch("{{ url_for('dashboard.delete_schedule') }}", {
+        formData.append('id', info.event['id']);
+        formData.append('start', info.event['start'].getTime());
+        formData.append('end', info.event['end'].getTime());
+        formData.append('description', info.event['title']);
+        formData.append('type', info.event['classNames'][0].replace("item-", "").toUpperCase());
+
+        fetch("{{ url_for('dashboard.update_schedule') }}", {
           body: formData,
           method: "post"
-        }).then(res => console.log(res.status))
-        callback(item)
-      }, { once: true })
-      callback(null)
-    }
+        })
+      },
+
+      eventClick: function (info) {
+        const name = document.querySelector('#description');
+        const type = document.querySelector('#schedule-type');
+        name.value = info.event.title;
+        type.value = info.event['classNames'][0].replace("item-", "").toUpperCase();
+
+        (new bootstrap.Modal('#scheduleModal', {})).show();
+
+        document.querySelector('#add').addEventListener('click', (event) => {
+          const name = document.querySelector('#description');
+          const type = document.querySelector('#schedule-type');
+
+          if ((!name.value) || (!type.value)) {
+            return
+          }
+
+          info.event.setProp("title", name.value)
+          info.event.setProp("classNames", ['item-' + type.value.toLowerCase()])
+
+          let formData = new FormData();
+
+          formData.append('id', info.event['id']);
+          formData.append('start', info.event['start'].getTime());
+          formData.append('end', info.event['end'].getTime());
+          formData.append('description', info.event['title']);
+          formData.append('type', info.event['classNames'][0].replace("item-", "").toUpperCase());
+
+          name.value = ''
+          
+
+          fetch("{{ url_for('dashboard.update_schedule') }}", {
+            body: formData,
+            method: "post"
+          }).then(res => console.log(res.status))
+        }, { once: true })
+
+        document.querySelector('#delete').addEventListener('click', (event) => {
+          const name = document.querySelector('#description');
+          const type = document.querySelector('#schedule-type');
+
+          let formData = new FormData();
+
+          name.value = ''
+          
+
+          formData.append('id', info.event['id']);
+          fetch("{{ url_for('dashboard.delete_schedule') }}", {
+            body: formData,
+            method: "post"
+          }).then(res => console.log(res.status))
+
+          info.event.remove()
+        }, { once: true })
+      },
+    });
+    calendar.render();
+  });
+</script>
+
+<style>
+  .fc-v-event .fc-event-main {
+    color: var(--fc-event-text-color), inherit !important;
   }
 
-  let timeline = new vis.Timeline(container, items, options)
+  .item-sleep {
+    background-color: #666DCB;
+    color: #fff;
+  }
 
-</script>
+  .item-study {
+    background-color: #3ABBC9;
+    color: #222;
+  }
+
+  .item-work {
+    background-color: #9BCA3E;
+    color: #222;
+  }
+
+  .item-break {
+    background-color: #FEEB51;
+    color: #222;
+  }
+
+  .item-exercise {
+    background-color: #FFB92A;
+    color: #222;
+  }
+
+  .item-other {
+    background-color: #ED5314;
+    color: #fff;
+  }
+</style>
 {% endblock %}

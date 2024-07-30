@@ -10,7 +10,7 @@
 
 {% block content %}
 
-<div class="accordion accordion-flush" id="accordionPercentage">
+<div class="accordion" id="accordionPercentage">
     <div class="accordion-item">
         <h2 class="accordion-header" id="simple">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
@@ -88,7 +88,6 @@
             <div class="accordion-body">
                 <div class="btn-group" role="group">
                     <button id="add-lessons" type="button" class="btn btn-primary">افزودن درس</button>
-                    <button id="calculate" type="button" class="btn btn-primary">محاسبه درصد ها</button>
                 </div>
 
                 <div id="lessons"></div>
@@ -174,7 +173,7 @@
                 <div class="input-group">
                     <label class="input-group-text col-form-label bg-dark text-light"
                         for="correct-count">ضریب</label>
-                    <input class="form-control text-center simple-precentage" type="tel" id="coefficent-${window.lessons}"
+                    <input class="form-control text-center advanced-precentage" type="tel" id="coefficent-${window.lessons}"
                         name="correct-count">
                 </div>
             </div>
@@ -182,21 +181,21 @@
                 <div class="input-group">
                     <label class="input-group-text col-form-label bg-success text-light"
                         for="correct-count">صحیح</label>
-                    <input class="form-control text-center simple-precentage" type="tel" id="correct-count-${window.lessons}"
+                    <input class="form-control text-center advanced-precentage" type="tel" id="correct-count-${window.lessons}"
                         name="correct-count">
                 </div>
             </div>
             <div class="col">
                 <div class="input-group">
                     <label class="input-group-text col-form-label text-light bg-danger">غلط</label>
-                    <input class="form-control text-center simple-precentage" type="tel" id="mistake-count-${window.lessons}"
+                    <input class="form-control text-center advanced-precentage" type="tel" id="mistake-count-${window.lessons}"
                         name="mistake-count">
                 </div>
             </div>
             <div class="col">
                 <div class="input-group">
                     <label class="input-group-text col-form-label text-dark bg-warning">نزده</label>
-                    <input class="form-control text-center simple-precentage" type="tel" id="not-awnsered-count-${window.lessons}"
+                    <input class="form-control text-center advanced-precentage" type="tel" id="not-awnsered-count-${window.lessons}"
                         name="not-awnsered-count">
                 </div>
             </div>
@@ -207,41 +206,47 @@
         `
         document.querySelector('#lessons').innerHTML += template;
 
-        window.lessons++;
-    })
-
-
-    document.querySelector('#calculate').addEventListener('click', function calculate(event) {
-        const lessons = document.querySelectorAll('.lesson')
-
-        let totalPercents = [];
-        let withoutMistakePercents = [];
-        let totalQuestions = [];
-        let coefficents = [];
-
-        lessons.forEach((lesson) => {
-            const id = (lesson.getAttribute('lesson-id'))
-            const coefficent = parseInt(document.querySelector(`#coefficent-${id}`).value)
-            const cntCorrect = parseInt(document.querySelector(`#correct-count-${id}`).value)
-            const cntMistake = parseInt(document.querySelector(`#mistake-count-${id}`).value)
-            const cntNoAnswer = parseInt(document.querySelector(`#not-awnsered-count-${id}`).value)
-
-            const [totalQuestion, totalPercent, withoutMistakePercent] = calculatePrecentage(cntCorrect, cntMistake, cntNoAnswer)
-
-            totalPercents.push(totalPercent)
-            withoutMistakePercents.push(withoutMistakePercent)
-            totalQuestions.push(totalQuestion)
-            coefficents.push(coefficent)
+        document.querySelectorAll('.advanced-precentage').forEach((element) => {
+            element.addEventListener('keyup', (event) => {
+    
+                const lessons = document.querySelectorAll('.lesson')
+    
+                let totalPercents = [];
+                let withoutMistakePercents = [];
+                let totalQuestions = [];
+                let coefficents = [];
+    
+                lessons.forEach((lesson) => {
+                    const id = (lesson.getAttribute('lesson-id'))
+                    const coefficent = parseInt(document.querySelector(`#coefficent-${id}`).value)
+                    const cntCorrect = parseInt(document.querySelector(`#correct-count-${id}`).value)
+                    const cntMistake = parseInt(document.querySelector(`#mistake-count-${id}`).value)
+                    const cntNoAnswer = parseInt(document.querySelector(`#not-awnsered-count-${id}`).value)
+    
+                    const [totalQuestion, totalPercent, withoutMistakePercent] = calculatePrecentage(cntCorrect, cntMistake, cntNoAnswer)
+    
+                    totalPercents.push(totalPercent)
+                    withoutMistakePercents.push(withoutMistakePercent)
+                    totalQuestions.push(totalQuestion)
+                    coefficents.push(coefficent)
+                })
+    
+                const totalCoefficent = coefficents.reduce((a, b) => a + b, 0);
+                const totalPercent = totalPercents.map((v, i) => v * coefficents[i]).reduce((a, b) => a + b, 0) / totalCoefficent;
+                const withoutMistakePercent = withoutMistakePercents.map((v, i) => v * coefficents[i]).reduce((a, b) => a + b, 0) / totalCoefficent;
+                const totalQuestion = totalQuestions.reduce((a, b) => a + b, 0);
+    
+                if (isNaN(totalCoefficent) || isNaN(totalPercent) || isNaN(withoutMistakePercent) || isNaN(totalQuestion)) {
+                    return
+                }
+    
+                document.querySelector('#advanced-percentage').innerText = ('% ' + totalPercent);
+                document.querySelector('#advanced-raw-precentage').innerText = ('% ' + withoutMistakePercent);
+                document.querySelector('#advanced-question-count').innerText = (totalQuestion);
+    
+            })
         })
-
-        const totalCoefficent = coefficents.reduce((a, b) => a + b, 0);
-        const totalPercent = totalPercents.map((v, i) => v * coefficents[i]).reduce((a, b) => a + b, 0) / totalCoefficent;
-        const withoutMistakePercent = withoutMistakePercents.map((v, i) => v * coefficents[i]).reduce((a, b) => a + b, 0) / totalCoefficent;
-        const totalQuestion = totalQuestions.reduce((a, b) => a + b, 0);
-
-        document.querySelector('#advanced-percentage').innerText = ('% ' + totalPercent);
-        document.querySelector('#advanced-raw-precentage').innerText = ('% ' + withoutMistakePercent);
-        document.querySelector('#advanced-question-count').innerText = (totalQuestion);
+        window.lessons++;
     })
 
 </script>

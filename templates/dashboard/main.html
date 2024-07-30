@@ -5,10 +5,49 @@
 {% block title %}صفحه اصلی{% endblock %}
 {% block header %}صفحه اصلی{% endblock %}
 {% block content %}
-<h2>برنامه ریزی امروز</h2>
-<div id="visualization"></div>
+<!-- fullcalendar bundle -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/fa.global.min.js"></script>
+<div id='calendar'></div>
 
 <br>
+
+<script>
+  let server_data = {{ today_schedules| safe }}
+
+  server_data = server_data.map((entry) => {
+    return {
+      start: new Date(entry['start'] * 1000),
+      end: new Date(entry['end'] * 1000),
+      title: entry['description'],
+      id: entry['id'],
+      className: 'item-' + entry['type'].toLowerCase(),
+    }
+  })
+
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'timeGridDay',
+      locale: 'fa',
+      events: server_data,
+      slotDuration: '00:15:00',
+      themeSystem: 'bootstrap5',
+      nowIndicator: true,
+      allDaySlot: false,
+      aspectRatio: 2,
+
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+    });
+    calendar.render();
+  });
+</script>
 
 <h2>اهداف</h2>
 
@@ -36,75 +75,47 @@
 {% endblock %}
 
 {% block code %}
-<script type="text/javascript" src="https://unpkg.com/vis-timeline@latest/standalone/umd/vis-timeline-graph2d.min.js"></script>
-<link href="https://unpkg.com/vis-timeline@latest/styles/vis-timeline-graph2d.min.css" rel="stylesheet" type="text/css" />
-
 
 {% for goal in week_goals %}
-
 <script>
   document.querySelector("#goal-{{ goal.id }}").innerText = moment("{{ goal.deadline }}").locale('fa').format('YYYY/MM/DD hh:mm')
-</script>       
-
+</script>
 {% endfor %}
 
+
 <style>
-  .vis-item.sleep {
+  .fc-v-event .fc-event-main {
+    color: var(--fc-event-text-color), inherit !important;
+  }
+
+  .item-sleep {
     background-color: #666DCB;
     color: #fff;
   }
-  .vis-item.study {
+
+  .item-study {
     background-color: #3ABBC9;
-    color: #fff;
+    color: #222;
   }
-  .vis-item.work {
+
+  .item-work {
     background-color: #9BCA3E;
     color: #222;
   }
-  .vis-item.break {
+
+  .item-break {
     background-color: #FEEB51;
     color: #222;
   }
-  .vis-item.exercise {
+
+  .item-exercise {
     background-color: #FFB92A;
     color: #222;
   }
-  .vis-item.other {
+
+  .item-other {
     background-color: #ED5314;
     color: #fff;
   }
 </style>
-
-<script>
-  let container = document.querySelector('#visualization')
-
-  let server_data = {{ today_schedules|safe }}
-
-  server_data = server_data.map((entry) => {
-    return {
-      start: new Date(entry['start'] * 1000),
-      end: new Date(entry['end'] * 1000),
-      content: entry['description'],
-      id: entry['id'],
-      className: entry['type'].toLowerCase()
-    }
-  })
-
-  let items = new vis.DataSet(server_data)
-
-  let now = new Date();
-
-  let options = {
-    min: now.setHours(0, 0, 0, 0),
-    max: now.setHours(23, 59, 59),
-    rtl: true,
-    locale: 'fa',
-    timeAxis: {
-      scale: 'minute', step: 15
-    }
-  }
-
-  let timeline = new vis.Timeline(container, items, options)
-
-</script>
 {% endblock %}

@@ -20,6 +20,8 @@ app.config.from_mapping(
     SQLALCHEMY_DATABASE_URI='sqlite:///kara.sqlite',
 )
 
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+
 db.init_app(app)
 
 login_manager = LoginManager()
