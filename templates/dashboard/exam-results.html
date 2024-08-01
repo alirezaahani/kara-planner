@@ -32,14 +32,20 @@
             <div class="input-group mb-3">
               <label for="result-type" class="input-group-text col-form-label">نوع آزمون</label>
               <select class="form-select" id="result-type" name="result-type" required>
-                <option value="TEST">تستی</option>
-                <option value="QUIZ">کویز</option>
+                <option value="TEST">چهار گزینه ای</option>
+                <option value="QUIZ">آزمونک</option>
                 <option value="ESSAY">تشریحی</option>
+                <option value="OTHER">سایر</option>
               </select>
             </div>
             <div class="input-group mb-3">
               <label for="result-value" class="input-group-text col-form-label">نتیجه</label>
               <input type="number" name="result-value" class="form-control" id="result-value" step="any" value="0"
+                required>
+            </div>
+            <div class="input-group mb-3">
+              <label for="result-description" class="input-group-text col-form-label">توضیحات</label>
+              <input type="text" name="result-description" class="form-control" id="result-description" step="any" value=""
                 required>
             </div>
             <div class="input-group mb-3">
@@ -71,6 +77,7 @@
               <th scope="col">تاریخ</th>
               <th scope="col">نوع</th>
               <th scope="col">نتیجه</th>
+              <th scope="col">توضیحات</th>
               <th scope="col">عملیات</th>
             </tr>
           </thead>
@@ -82,6 +89,7 @@
               </td>
               <td>{{ result.type.value }}</td>
               <td>{{ result.value }}</td>
+              <td>{{ result.description }}</td>
               <td>
                 <div class="btn-toolbar mb-2 mb-md-0">
                   <div class="btn-group me-2">

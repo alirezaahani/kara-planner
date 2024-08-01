@@ -64,7 +64,7 @@
       {% for goal in week_goals %}
       <tr>
         <td>{{ goal.id }}</td>
-        <td id="goal-{{ goal.id }}">
+        <td class="goal-deadlines" id="goal-{{ goal.id }}" goal-deadline="{{ goal.deadline }}">
         </td>
         <td>{{ goal.description }}</td>
       </tr>
@@ -76,17 +76,20 @@
 
 {% block code %}
 
-{% for goal in week_goals %}
 <script>
-  document.querySelector("#goal-{{ goal.id }}").innerText = moment("{{ goal.deadline }}").locale('fa').format('YYYY/MM/DD hh:mm')
+  document.querySelectorAll('.goal-deadlines').forEach(el => {
+    el.innerText = moment(new Date(el.getAttribute('goal-deadline'))).locale('fa').format('YYYY/MM/DD hh:mm')
+  })
 </script>
-{% endfor %}
+
+
 
 
 <style>
   .fc-v-event .fc-event-main {
     color: var(--fc-event-text-color), inherit !important;
   }
+
 
   .item-sleep {
     background-color: #666DCB;
@@ -109,12 +112,12 @@
   }
 
   .item-exercise {
-    background-color: #FFB92A;
+    background-color: #FF8C00;
     color: #222;
   }
 
   .item-other {
-    background-color: #ED5314;
+    background-color: #D2042D;
     color: #fff;
   }
 </style>

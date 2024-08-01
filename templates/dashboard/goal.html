@@ -64,7 +64,7 @@
       {% for goal in week_goals %}
       <tr>
         <td>{{ goal.id }}</td>
-        <td id="goal-{{ goal.id }}">
+        <td class="goal-deadlines" id="goal-{{ goal.id }}" goal-deadline="{{ goal.deadline }}">
         </td>
         <td>{{ goal.description }}</td>
         <td>
@@ -94,14 +94,11 @@
 <script src="https://mds92.github.io/MD.BootstrapPersianDateTimePicker/src/mds.bs.datetimepicker.js"
   type="text/javascript"></script>
 
-{% for goal in week_goals %}
-
-<script>
-  document.querySelector("#goal-{{ goal.id }}").innerText = moment("{{ goal.deadline }}").locale('fa').format('YYYY/MM/DD hh:mm')
-</script>
-
-{% endfor %}
-
+  <script>
+    document.querySelectorAll('.goal-deadlines').forEach(el => {
+      el.innerText = moment(new Date(el.getAttribute('goal-deadline'))).locale('fa').format('YYYY/MM/DD hh:mm')
+    })
+  </script>
 
 <script>
   const dtp1Instance = new mds.MdsPersianDateTimePicker(document.getElementById('dtp1'), {

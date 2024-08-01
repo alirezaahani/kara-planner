@@ -1,0 +1,30 @@
+{% extends 'auth/common.html' %}
+
+{% block title %}ورود{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('auth.login_process') }}">
+  <h1 class="h2 mb-3 fw-normal">ورود</h1>
+
+  <div class="form-floating">
+    <input type="text" class="form-control middle" id="floatingUsername" name="username" placeholder="Username"
+      required>
+    <label for="floatingUsername">نام کاربری</label>
+  </div>
+
+  <div class="form-floating">
+    <input type="password" class="form-control end" id="floatingPassword" name="password" placeholder="Password"
+      required>
+    <label for="floatingPassword">رمز عبور</label>
+  </div>
+
+  <input type="hidden" name="next" value="{{ request.args.get('next', '') }}" />
+
+  <div class="checkbox mb-3">
+    <label>
+      <input type="checkbox" name="remember" value="True"> من را به خاطر بسپار
+    </label>
+  </div>
+  <button class="w-100 btn btn-lg btn-primary" type="submit">ورود</button>
+</form>
+{% endblock %}

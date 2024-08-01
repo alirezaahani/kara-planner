@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from models import db, Schedule, DataClassEncoder, ScheduleEnum, Goal, ExamResult, ExamEnum
 import datetime
@@ -11,12 +11,14 @@ dashboard = Blueprint('dashboard', __name__)
 @login_required
 def main():
     now = datetime.datetime.now()
-    start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    end = now.replace(hour=23, minute=59, second=59)
+    today = datetime.date.today()
+    first = today.replace(day=1)
+    last_month = first - datetime.timedelta(days=1)
+    next_month = first + datetime.timedelta(days=32)
 
     query = db.session.query(Schedule) \
-            .filter(Schedule.start.between(start, end)) \
-            .filter(Schedule.end.between(start, end)) \
+            .filter(Schedule.start.between(last_month, next_month)) \
+            .filter(Schedule.end.between(last_month, next_month)) \
             .filter_by(user_id=current_user.id).all()
     
     week_goals = db.session.query(Goal) \
@@ -28,13 +30,14 @@ def main():
 @dashboard.route('/dashboard/edit', methods=['GET'])
 @login_required
 def edit_today():
-    now = datetime.datetime.now()
-    start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    end = now.replace(hour=23, minute=59, second=59)
+    today = datetime.date.today()
+    first = today.replace(day=1)
+    last_month = first - datetime.timedelta(days=1)
+    next_month = first + datetime.timedelta(days=32)
 
     query = db.session.query(Schedule) \
-            .filter(Schedule.start.between(start, end)) \
-            .filter(Schedule.end.between(start, end)) \
+            .filter(Schedule.start.between(last_month, next_month)) \
+            .filter(Schedule.end.between(last_month, next_month)) \
             .filter_by(user_id=current_user.id).all()
 
     return render_template('dashboard/edit.html', today_schedules=json.dumps(query, cls=DataClassEncoder))
@@ -170,20 +173,22 @@ def exam_results():
     grouped_results = {}
     grouped_labels = {}
     grouped_values = {}
-    
+    grouped_descriptions = {}
 
     for k, g in itertools.groupby(query, lambda x: x.type):
         grouped_results[k] = []
         grouped_labels[k] = []
         grouped_values[k] = []
+        grouped_descriptions[k] = []
 
         for i in g:
             grouped_results[k].append(i)
             grouped_labels[k].append(datetime.datetime.combine(i.date, datetime.datetime.min.time()).timestamp() * 1000)
             grouped_values[k].append(i.value)
+            grouped_descriptions[k].append(i.description)
             
 
-    return render_template('dashboard/exam-results.html', grouped_results=grouped_results, grouped_values=grouped_values, grouped_labels=grouped_labels)
+    return render_template('dashboard/exam-results.html', grouped_results=grouped_results, grouped_values=grouped_values, grouped_labels=grouped_labels, grouped_descriptions=grouped_descriptions)
 
 
 @dashboard.route('/dashboard/add_exam_result', methods=['POST'])
@@ -193,8 +198,9 @@ def add_exam_result():
     type = ExamEnum[request.form.get('result-type')]
     date = datetime.datetime.strptime(request.form.get('date'), '%Y/%m/%d')
     value = request.form.get('result-value')
+    description = request.form.get('result-description')
 
-    result = ExamResult(date=date, type=type, value=value, user_id=current_user.id)
+    result = ExamResult(date=date, type=type, value=value, user_id=current_user.id, description=description)
     db.session.add(result)
 
     db.session.commit()
@@ -210,3 +216,10 @@ def delete_exam_result():
     db.session.commit()
 
     return redirect(url_for('dashboard.exam_results'))
+
+
+@dashboard.route('/dashboard/change_info', methods=['GET'])
+@login_required
+def change_info():
+
+    return render_template('dashboard/change-info.html')
