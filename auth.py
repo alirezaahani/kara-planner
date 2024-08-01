@@ -46,7 +46,7 @@ def register_process():
         flash('رمز عبور به درستی تکرار نشده است.', 'danger')
         return redirect(url_for('auth.register_show')) 
     
-    if not password_check(request.form.get('passwrod')):
+    if not password_check(request.form.get('password')):
         flash('رمز عبور باید شرایط ذکر شده را داشته باشد.', 'danger')
         return redirect(url_for('auth.register_show')) 
     
