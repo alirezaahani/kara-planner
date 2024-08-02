@@ -92,23 +92,3 @@ class ExamResult(db.Model):
     
     user_id = db.Column(db.ForeignKey(User.id))
     user = db.relationship(User)
-
-
-@dataclass
-class ScheduleStructure(db.Model):
-    id: int
-    repeats: timedelta
-    starting: datetime
-    ending: datetime
-    description: str
-    type: ScheduleEnum
-
-    id = db.Column(db.Integer, primary_key=True)
-    repeats = db.Column(db.Interval)
-    starting = db.Column(db.DateTime)
-    ending = db.Column(db.DateTime, nullable=True)
-    description = db.Column(db.String)
-    type = db.Column(db.Enum(ScheduleEnum))
-    
-    user_id = db.Column(db.ForeignKey(User.id))
-    user = db.relationship(User)

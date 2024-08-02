@@ -1,4 +1,5 @@
 {% extends 'auth/common.html' %}
+{% set active_page = 'login' %}
 
 {% block title %}ورود{% endblock %}
 
@@ -25,6 +26,6 @@
       <input type="checkbox" name="remember" value="True"> من را به خاطر بسپار
     </label>
   </div>
-  <button class="w-100 btn btn-lg btn-primary" type="submit">ورود</button>
+  <button class="w-100 btn btn-lg btn-primary mb-1" type="submit">ورود</button>
 </form>
 {% endblock %}

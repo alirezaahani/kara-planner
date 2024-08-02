@@ -89,6 +89,14 @@
         {% endwith %}
 
         {% block content %}{% endblock %}
+
+        {% if active_page != 'login' %}
+        <a class="w-100 btn btn-lg btn-secondary mb-1" href="{{ url_for('auth.login_show') }}" role="button">ورود</a>
+        {% endif %}
+
+        {% if active_page != 'register' %}
+        <a class="w-100 btn btn-lg btn-secondary mb-1" href="{{ url_for('auth.register_show') }}" role="button">ثبت نام</a>
+        {% endif %}
     </main>
 
 

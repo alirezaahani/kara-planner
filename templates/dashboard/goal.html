@@ -26,24 +26,25 @@
       </div>
       <form action="{{ url_for('dashboard.update_add_goal') }}" method="POST">
         <div class="modal-body">
-          <div class="input-group mb-3">
+          
+          <div class="input-group mb-3" id="id-group">
             <label for="description" class="input-group-text col-form-label">#</label>
-            <input type="text" name="id" class="form-control" id="id" style="background-color: #eee;"
-              readonly="readonly">
+            <input type="text" name="id" class="form-control" id="id" style="background-color: #eee;" readonly="readonly">
           </div>
+          
           <div class="input-group mb-3">
             <label for="description" class="input-group-text col-form-label">توضیحات</label>
-            <input type="text" name="description" class="form-control" id="description">
+            <input type="text" name="description" class="form-control" id="description" required>
           </div>
           <div class="input-group mb-3">
-            <span class="input-group-text cursor-pointer" id="dtp1">📅</span>
-            <input type="text" class="form-control" id="date" data-name="dtp1-text">
-            <input type="text" class="form-control" id="date2" name="date" data-name="dtp1-date">
+            <label for="date" class="input-group-text col-form-label">موعد</label>
+            <input type="text" class="form-control" id="date" data-jdp required>
           </div>
+          <input type="text" name="date" hidden>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
-          <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">ذخیره</button>
+          <button type="submit" class="btn btn-primary">ذخیره</button>
         </div>
       </form>
     </div>
@@ -73,7 +74,7 @@
               <button type="button" goal-id="{{ goal.id }}" class="btn btn-sm btn-outline-success"
                 onclick="remove({{ goal.id }});">اکمال هدف</button>
               <button type="button" goal-id="{{ goal.id }}" goal-desc="{{ goal.description }}"
-                goal-date="{{ goal.deadline.strftime('%Y/%m/%d %H:%M') }}" class="btn btn-sm btn-outline-primary"
+                goal-date="{{ goal.deadline.strftime('%Y/%m/%d %H:%M:%S') }}" class="btn btn-sm btn-outline-primary"
                 data-bs-toggle="modal" data-bs-target="#goalModal">ویرایش هدف</button>
               <button type="button" goal-id="{{ goal.id }}" class="btn btn-sm btn-outline-danger"
                 onclick="remove({{ goal.id }});">حذف هدف</button>
@@ -89,41 +90,45 @@
 {% endblock %}
 
 {% block code %}
-<link rel="stylesheet"
-  href="https://mds92.github.io/MD.BootstrapPersianDateTimePicker/src/mds.bs.datetimepicker.style.css" />
-<script src="https://mds92.github.io/MD.BootstrapPersianDateTimePicker/src/mds.bs.datetimepicker.js"
-  type="text/javascript"></script>
+<link rel="stylesheet" href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
+<script type="text/javascript" src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
 
+<script>
+  jalaliDatepicker.startWatch();
+  jalaliDatepicker.updateOptions({
+    date: true,
+    time: true,
+    zIndex: 10000,
+  });
+
+  document.querySelector('#date').addEventListener("change", function(e) {
+    document.querySelector('input[name="date"]').value = moment.from(e.target.value, 'fa', 'YYYY/MM/DD hh:mm:ss').format('YYYY/MM/DD hh:mm:ss')
+  })
+</script>
   <script>
     document.querySelectorAll('.goal-deadlines').forEach(el => {
-      el.innerText = moment(new Date(el.getAttribute('goal-deadline'))).locale('fa').format('YYYY/MM/DD hh:mm')
+      el.innerText = moment(new Date(el.getAttribute('goal-deadline'))).locale('fa').format('YYYY/MM/DD hh:mm:ss')
     })
   </script>
 
 <script>
-  const dtp1Instance = new mds.MdsPersianDateTimePicker(document.getElementById('dtp1'), {
-    targetTextSelector: '[data-name="dtp1-text"]',
-    targetDateSelector: '[data-name="dtp1-date"]',
-    enableTimePicker: true
-  });
-
-
   const goalModal = document.getElementById('goalModal')
   goalModal.addEventListener('show.bs.modal', event => {
     const button = event.relatedTarget
     if (!button.getAttribute('goal-id')) {
       return
     }
-
     const date = button.getAttribute('goal-date');
     const desc = button.getAttribute('goal-desc');
     const id = button.getAttribute('goal-id');
 
     document.querySelector('#id').value = id
     document.querySelector('#description').value = desc
-    document.querySelector('#date2').value = date
-    document.querySelector('#date').value = moment(date).locale('fa').format('YYYY/MM/DD hh:mm')
+    document.querySelector('#date').value = moment(date).locale('fa').format('YYYY/MM/DD hh:mm:ss')
+  })
 
+  goalModal.addEventListener('hidden.bs.modal', event => {
+    dtp1Instance.clearDate();
   })
 
   function remove(id) {

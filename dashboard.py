@@ -109,7 +109,7 @@ def edit_goal():
 def update_add_goal():
     id = (request.form.get('id').strip())
     description = request.form.get('description').strip()
-    date = datetime.datetime.strptime(request.form.get('date'), '%Y/%m/%d %H:%M')
+    date = datetime.datetime.strptime(request.form.get('date'), '%Y/%m/%d %H:%M:%S')
 
     if id:
         db.session.query(Goal).filter_by(user_id=current_user.id, id=int(id)).update({

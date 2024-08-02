@@ -24,6 +24,9 @@ def password_check(password: str):
 
 @auth.route("/register", methods=['GET'])
 def register_show():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard.main'))
+
     captcha = captcha_handle.create(length=5)
     return render_template('auth/register.html', captcha=captcha)
 
@@ -69,6 +72,9 @@ def register_process():
 
 @auth.route('/login', methods=['GET'])
 def login_show():
+    if current_user.is_authenticated:
+        return redirect(request.form.get('next', '') or url_for('dashboard.main'))
+
     return render_template('auth/login.html')
 
 LOGIN_FIELDS = {'username', 'password'}
@@ -97,10 +103,7 @@ def login_process():
     login_user(user, remember=remember_me)
     flash(f'سلام {user.name}، شما با موفقیت وارد شدید!', 'success')
 
-    next = request.form.get("next", url_for('dashboard.main'))
-    next = next if next else url_for('dashboard.main')
-
-    return redirect(next) 
+    return redirect(request.form.get('next', '') or url_for('dashboard.main')) 
 
 @auth.route('/logout')
 @login_required
