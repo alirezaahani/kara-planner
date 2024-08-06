@@ -5,6 +5,8 @@ import datetime
 import json
 import itertools
 
+from sqlalchemy.sql import functions
+
 dashboard = Blueprint('dashboard', __name__)
 
 @dashboard.route('/dashboard', methods=['GET'])
@@ -151,29 +153,45 @@ def delete_goal():
 def percentage():
     return render_template('dashboard/percentage.html')
 
-@dashboard.route('/dashboard/study_time', methods=['GET'])
+@dashboard.route('/dashboard/graphs', methods=['GET'])
 @login_required
-def study_time():
+def graphs():
     now = datetime.datetime.now()
     
     start = (now - datetime.timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
     end = (start + datetime.timedelta(days=6)).replace(hour=23, minute=59, second=59)
 
-    schedules = db.session.query(Schedule.start, Schedule.end) \
+    schedules = db.session.query(Schedule) \
             .filter(Schedule.start.between(start, end)) \
             .filter(Schedule.end.between(start, end)) \
-            .filter_by(user_id=current_user.id, type=ScheduleEnum.STUDY).all()
+            .filter_by(user_id=current_user.id).all()
+    
+    user_types = db.session.query(ScheduleType) \
+        .filter_by(user_id=current_user.id).all()
+    
+    data = {}
 
+    for type_id, group in itertools.groupby(schedules, lambda x: x.type_id):
+        if not type_id in data:
+            data[type_id] = []
+        
+        type = user_types[type_id]
 
-    times = {}
-    for k, g in itertools.groupby(schedules, lambda x: x[0].strftime('%Y/%m/%d')):
-        time = 0
-        for i in g:
-            duration: datetime.timedelta = i[1] - i[0]
-            time += (duration.total_seconds() / 3600)
-        times[k] = time
+        per_day_total = {}
+        
+        for day, day_schedules in itertools.groupby(group, lambda x: x.start.strftime('%Y/%m/%d')):
+            total = 0
+            for schedule in day_schedules:
+                duration: datetime.timedelta = schedule.end - schedule.start
+                total += (duration.total_seconds() / 3600)
+            per_day_total[day] = total
 
-    return render_template('dashboard/study-time.html', labels=list(times.keys()), data=list(times.values()))
+        data[type_id].append({
+            'type': type,
+            'per_day_total': per_day_total
+        })
+        
+    return render_template('dashboard/graphs.html', data=json.dumps(data, cls=DataClassEncoder))
 
 
 

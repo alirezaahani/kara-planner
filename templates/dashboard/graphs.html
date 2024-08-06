@@ -1,0 +1,124 @@
+{% extends 'dashboard/common.html' %}
+{% set active_page = 'graphs' %}
+
+
+{% block title %}نمودار های برنامه ریزی{% endblock %}
+{% block header %}نمودار های برنامه ریزی{% endblock %}
+
+{% block toolbar %}
+{% endblock %}
+
+{% block content %}
+
+<canvas id="myBarChart"></canvas>
+<canvas id="myLineChart"></canvas>
+
+{% endblock %}
+
+{% block code %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  Chart.defaults.font.family = "Vazirmatn"
+
+  let server_data = {{ data| safe }}
+
+  const ctxBar = document.getElementById('myBarChart').getContext('2d');
+  const ctxLine = document.getElementById('myLineChart').getContext('2d');
+
+  const datasets = [];
+  const labels = new Set();
+
+  for (const [key, value] of Object.entries(server_data)) {
+    const type = value[0].type;
+    const data = {};
+
+    value.forEach(item => {
+      let date = Object.keys(item.per_day_total)[0];
+      let total = item.per_day_total[date];
+      date = moment(date, 'YYYY/MM/DD').locale('fa').format('YYYY/MM/DD');
+      data[date] = total;
+      labels.add(date);
+    });
+
+    datasets.push({
+      label: type.description,
+      data: data,
+      backgroundColor: type.background_color_hex + '40',
+      borderColor: type.background_color_hex,
+      borderWidth: 1
+    });
+  }
+
+  const sortedLabels = Array.from(labels).sort();
+
+  // Bar Chart
+  const barChart = new Chart(ctxBar, {
+    type: 'bar',
+    data: {
+      labels: sortedLabels,
+      datasets: datasets
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          stacked: true,
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true
+        }
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: 'خلاصه برنامه ریزی'
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false
+        }
+      }
+    }
+  });
+
+  // Line Chart
+  const lineDatasets = datasets.map(dataset => ({
+    ...dataset,
+    fill: false,
+    tension: 0.1,
+    backgroundColor: dataset.backgroundColor
+  }));
+
+  const lineChart = new Chart(ctxLine, {
+    type: 'line',
+    data: {
+      labels: sortedLabels,
+      datasets: lineDatasets
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Hours'
+          }
+        }
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: 'روند برنامه ریزی'
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false
+        }
+      }
+    }
+  });
+</script>
+{% endblock %}
