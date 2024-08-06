@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from captcha import captcha_handle
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, db, ScheduleType
+from models import User, db, ScheduleType, ExamType
 from flask_login import login_required, logout_user, login_user, current_user
 import sqlalchemy
 
@@ -76,6 +76,16 @@ def register_process():
         for color in colors:
             schedule_type = ScheduleType(description=color[0], background_color_hex=color[1], text_color_hex=color[2], user_id=user.id)
             db.session.add(schedule_type)
+
+        exams = (
+            ('test', '#666DCB'),
+            ('quiz', '#3ABBC9'),
+            ('essay', '#9BCA3E'),        
+        )
+    
+        for exam in exams:
+            exam_type = ExamType(description=exam[0], color_hex=exam[1], user_id=user.id)
+            db.session.add(exam_type)
 
         db.session.commit()
 

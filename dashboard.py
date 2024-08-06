@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from models import db, Schedule, DataClassEncoder, Goal, ExamResult, ExamEnum, ScheduleType
+from models import db, Schedule, DataClassEncoder, Goal, ExamResult, ScheduleType, ExamType
 import datetime
 import json
 import itertools
@@ -164,7 +164,8 @@ def graphs():
     schedules = db.session.query(Schedule) \
             .filter(Schedule.start.between(start, end)) \
             .filter(Schedule.end.between(start, end)) \
-            .filter_by(user_id=current_user.id).all()
+            .filter_by(user_id=current_user.id) \
+            .order_by(Schedule.type_id, Schedule.start).all()
     
     user_types = db.session.query(ScheduleType) \
         .filter_by(user_id=current_user.id).all()
@@ -201,39 +202,44 @@ def graphs():
 @dashboard.route('/dashboard/exam_results', methods=['GET'])
 @login_required
 def exam_results():
-    query = db.session.query(ExamResult).filter_by(user_id=current_user.id).order_by(ExamResult.type, ExamResult.date).all()
+    results = db.session.query(ExamResult) \
+        .filter_by(user_id=current_user.id) \
+        .order_by(ExamResult.type_id, ExamResult.date).all()
+    
+    exam_types = db.session.query(ExamType) \
+        .filter_by(user_id=current_user.id).all()
+    
+    data = {}
 
-    grouped_results = {}
-    grouped_labels = {}
-    grouped_values = {}
-    grouped_descriptions = {}
+    for type_id, group in itertools.groupby(results, lambda x: x.type_id):
+        if not type_id in data:
+            data[type_id] = []
+        
+        type = None
+        for i in exam_types:
+            if i.id == type_id:
+                type = i
 
-    for k, g in itertools.groupby(query, lambda x: x.type):
-        grouped_results[k] = []
-        grouped_labels[k] = []
-        grouped_values[k] = []
-        grouped_descriptions[k] = []
+        data[type_id].append({
+            'type': type,
+            'result': list(group)
+        })
 
-        for i in g:
-            grouped_results[k].append(i)
-            grouped_labels[k].append(datetime.datetime.combine(i.date, datetime.datetime.min.time()).timestamp() * 1000)
-            grouped_values[k].append(i.value)
-            grouped_descriptions[k].append(i.description)
-            
-
-    return render_template('dashboard/exam-results.html', grouped_results=grouped_results, grouped_values=grouped_values, grouped_labels=grouped_labels, grouped_descriptions=grouped_descriptions)
+    return render_template('dashboard/exam-results.html', data=json.dumps(data, cls=DataClassEncoder), exam_types=exam_types)
 
 
 @dashboard.route('/dashboard/add_exam_result', methods=['POST'])
 @login_required
 def add_exam_result():
+    type = db.session.query(ExamType) \
+        .filter(ExamType.id == int(request.form.get('result-type', 0))) \
+        .filter_by(user_id=current_user.id).one()
 
-    type = ExamEnum[request.form.get('result-type')]
     date = datetime.datetime.strptime(request.form.get('date'), '%Y/%m/%d')
     value = request.form.get('result-value')
     description = request.form.get('result-description')
 
-    result = ExamResult(date=date, type=type, value=value, user_id=current_user.id, description=description)
+    result = ExamResult(date=date, type_id=type.id, value=value, user_id=current_user.id, description=description)
     db.session.add(result)
 
     db.session.commit()
@@ -254,5 +260,4 @@ def delete_exam_result():
 @dashboard.route('/dashboard/change_info', methods=['GET'])
 @login_required
 def change_info():
-
     return render_template('dashboard/change-info.html')

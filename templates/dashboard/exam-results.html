@@ -15,160 +15,200 @@
 {% endblock %}
 
 {% block content %}
+<!-- Modal -->
+<div class="modal fade" id="resultModal" aria-labelledby="resultModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="resultModalLabel">افزودن نتیجه</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('dashboard.add_exam_result') }}" method="POST">
+        <div class="modal-body">
+          <div class="input-group mb-3">
+            <label for="result-type" class="input-group-text col-form-label">نوع آزمون</label>
+            <select class="form-select" id="result-type" name="result-type" required>
+              {% for exam_type in exam_types %}
+              <option value="{{ exam_type.id }}">{{ exam_type.description }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="input-group mb-3">
+            <label for="result-value" class="input-group-text col-form-label">نتیجه</label>
+            <input type="number" name="result-value" class="form-control" id="result-value" step="any" value="0"
+              required>
+          </div>
+          <div class="input-group mb-3">
+            <label for="result-description" class="input-group-text col-form-label">توضیحات</label>
+            <input type="text" name="result-description" class="form-control" id="result-description" step="any"
+              value="" required>
+          </div>
+          <div class="input-group mb-3">
+            <label for="date" class="input-group-text col-form-label">ناریخ</label>
+            <input type="text" class="form-control" id="date" data-jdp required>
+          </div>
+          <input type="text" name="date" hidden>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+          <button type="submit" class="btn btn-primary">ذخیره</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <div class="container">
 
-
-
-  <!-- Modal -->
-  <div class="modal fade" id="resultModal" aria-labelledby="resultModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="resultModalLabel">افزودن نتیجه</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <form action="{{ url_for('dashboard.add_exam_result') }}" method="POST">
-          <div class="modal-body">
-            <div class="input-group mb-3">
-              <label for="result-type" class="input-group-text col-form-label">نوع آزمون</label>
-              <select class="form-select" id="result-type" name="result-type" required>
-                <option value="TEST">چهار گزینه ای</option>
-                <option value="QUIZ">آزمونک</option>
-                <option value="ESSAY">تشریحی</option>
-                <option value="OTHER">سایر</option>
-              </select>
-            </div>
-            <div class="input-group mb-3">
-              <label for="result-value" class="input-group-text col-form-label">نتیجه</label>
-              <input type="number" name="result-value" class="form-control" id="result-value" step="any" value="0"
-                required>
-            </div>
-            <div class="input-group mb-3">
-              <label for="result-description" class="input-group-text col-form-label">توضیحات</label>
-              <input type="text" name="result-description" class="form-control" id="result-description" step="any" value=""
-                required>
-            </div>
-            <div class="input-group mb-3">
-              <span class="input-group-text cursor-pointer" id="dtp1">📅</span>
-              <input type="text" class="form-control" id="date" data-name="dtp1-text" required>
-              <input type="text" class="form-control" id="date2" name="date" data-name="dtp1-date" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
-            <button type="submit" class="btn btn-primary">ذخیره</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  {% for key, results in grouped_results.items() %}
-  <div class="row">
-    <div class="col">
-      <canvas class="chart" id="exam-{{ key }}-chart"></canvas>
-    </div>
-    <div class="col">
-      <div class="table-responsive">
-        <table class="table table-striped table-sm">
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">تاریخ</th>
-              <th scope="col">نوع</th>
-              <th scope="col">نتیجه</th>
-              <th scope="col">توضیحات</th>
-              <th scope="col">عملیات</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for result in results %}
-            <tr>
-              <td>{{ result.id }}</td>
-              <td id="result-{{ result.id }}">
-              </td>
-              <td>{{ result.type.value }}</td>
-              <td>{{ result.value }}</td>
-              <td>{{ result.description }}</td>
-              <td>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                  <div class="btn-group me-2">
-                    <button type="button" class="btn btn-sm btn-outline-danger"
-                      onclick="remove({{ result.id }});">حذف</button>
-                  </div>
-                </div>
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  {% endfor %}
+  <div id="results-container"></div>
 </div>
 
 {% endblock %}
 
 {% block code %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link rel="stylesheet"
-  href="https://mds92.github.io/MD.BootstrapPersianDateTimePicker/src/mds.bs.datetimepicker.style.css" />
-<script src="https://mds92.github.io/MD.BootstrapPersianDateTimePicker/src/mds.bs.datetimepicker.js"
-  type="text/javascript"></script>
 
-{% for key, results in grouped_results.items() %}
-{% for result in results %}
+<link rel="stylesheet" href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
+<script type="text/javascript" src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
 
 <script>
-  document.querySelector("#result-{{ result.id }}").innerText = moment("{{ result.date }}").locale('fa').format('YYYY/MM/DD')
+  jalaliDatepicker.startWatch();
+  jalaliDatepicker.updateOptions({
+    date: true,
+    time: false,
+    zIndex: 10000,
+  });
+
+  document.querySelector('#date').addEventListener("change", function (e) {
+    document.querySelector('input[name="date"]').value = moment.from(e.target.value, 'fa', 'YYYY/MM/DD').format('YYYY/MM/DD')
+  })
 </script>
 
-{% endfor %}
-{% endfor %}
-
 <script>
-
-  const dtp1Instance = new mds.MdsPersianDateTimePicker(document.getElementById('dtp1'), {
-    targetTextSelector: '[data-name="dtp1-text"]',
-    targetDateSelector: '[data-name="dtp1-date"]',
-    enableTimePicker: false
-  });
-
-
-
   Chart.defaults.font.family = "Vazirmatn"
-  let server_data = [];
-
-  {% for key, results in grouped_results.items() %}
-  server_data = {{ grouped_labels[key] }};
-  server_data = server_data.map((v, i) => {
-    return moment(v).locale('fa').format('YYYY/MM/DD');
-  })
-
-  new Chart(document.getElementById('exam-{{ key }}-chart'), {
-    type: 'line',
-    data: {
-      labels: server_data,
-      datasets: [{
-        label: '{{ key.value }}',
-        data: {{ grouped_values[key] }},
-        borderWidth: 1
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      },
-    }
-  });
-  {% endfor %}
-
 
   function remove(id) {
     window.location.href = '{{ url_for("dashboard.delete_exam_result") }}?id=' + id
   }
+</script>
+
+
+<script>
+  let server_data = {{ data| safe }}
+
+  function generateHTMLAndCreateCharts(data) {
+    let html = '';
+
+    for (const [key, results] of Object.entries(data)) {
+      html += `
+      <div class="row">
+        <div class="col">
+          <canvas class="chart" id="exam-${key}-chart"></canvas>
+        </div>
+        <div class="col">
+          <div class="table-responsive">
+            <table class="table table-striped table-sm">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">تاریخ</th>
+                  <th scope="col">نوع</th>
+                  <th scope="col">نتیجه</th>
+                  <th scope="col">توضیحات</th>
+                  <th scope="col">عملیات</th>
+                </tr>
+              </thead>
+              <tbody>
+    `;
+
+      results[0].result.forEach(result => {
+        const date = new Date(result.date * 1000);
+        const formattedDate = moment(date).locale('fa').format('YYYY/MM/DD');
+
+        html += `
+                <tr>
+                  <td>${result.id}</td>
+                  <td>${formattedDate}</td>
+                  <td>${result.type.description}</td>
+                  <td>${result.value}</td>
+                  <td>${result.description}</td>
+                  <td>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                      <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="remove(${result.id});">حذف</button>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+      `;
+      });
+
+      html += `
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+    }
+
+    // Insert the generated HTML
+    document.getElementById('results-container').innerHTML = html;
+
+    // Create charts
+    for (const [key, results] of Object.entries(data)) {
+      const ctx = document.getElementById(`exam-${key}-chart`).getContext('2d');
+
+      const chartData = results[0].result.map(result => ({
+        x: moment(new Date(result.date * 1000)).locale('fa').format('YYYY/MM/DD'), // Format date as 'YYYY-MM-DD'
+        y: result.value
+      }));
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [{
+            label: results[0].type.description,
+            data: chartData,
+            backgroundColor: results[0].type.color_hex,
+            borderColor: results[0].type.color_hex,
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              type: 'category',
+              title: {
+                display: true,
+                text: 'تاریخ'
+              }
+            },
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'نتیجه'
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  const value = context.parsed.y;
+                  return `مقدار: ${value}`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // Call the function to generate HTML and create charts
+  generateHTMLAndCreateCharts(server_data);
 </script>
 {% endblock %}

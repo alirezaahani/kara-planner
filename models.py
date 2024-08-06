@@ -44,8 +44,8 @@ class ScheduleType(db.Model):
     description: Mapped[str] = mapped_column()
     background_color_hex: Mapped[str] = mapped_column()
     text_color_hex: Mapped[str] = mapped_column()
-    user_id: Mapped[int] = mapped_column(db.ForeignKey(User.id))
     
+    user_id = mapped_column(db.ForeignKey(User.id))
     user = db.relationship(User)
 
 @dataclass
@@ -70,25 +70,31 @@ class Goal(db.Model):
     user_id = mapped_column(db.ForeignKey(User.id))
     user = db.relationship(User)
 
+'''
 class ExamEnum(enum.Enum): 
     TEST = 'چهار گزینه ای'
     QUIZ = 'آزمونک'
     ESSAY = 'تشریحی'
     OTHER = 'سایر'
+'''
+
+@dataclass
+class ExamType(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str] = mapped_column()
+    color_hex: Mapped[str] = mapped_column()
+    user_id: Mapped[int] = mapped_column(db.ForeignKey(User.id))
+    
+    user = db.relationship(User)
 
 @dataclass
 class ExamResult(db.Model):
-    id: int
-    date: date
-    type: ExamEnum
-    value: float
-    description: str
+    id: Mapped[int] = mapped_column(primary_key=True)
+    date: Mapped[datetime] = mapped_column()
+    value: Mapped[float] = mapped_column()
+    description: Mapped[str] = mapped_column()
+    type: Mapped[ExamType] = db.relationship(ExamType)
+    type_id: Mapped[int] = mapped_column(db.ForeignKey(ExamType.id))
 
-    id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date)
-    type = db.Column(db.Enum(ExamEnum))
-    value = db.Column(db.Float)
-    description = db.Column(db.String)
-    
-    user_id = db.Column(db.ForeignKey(User.id))
+    user_id = mapped_column(db.ForeignKey(User.id))
     user = db.relationship(User)
