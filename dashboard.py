@@ -175,7 +175,10 @@ def graphs():
         if not type_id in data:
             data[type_id] = []
         
-        type = user_types[type_id]
+        type = None
+        for i in user_types:
+            if i.id == type_id:
+                type = i
 
         per_day_total = {}
         
