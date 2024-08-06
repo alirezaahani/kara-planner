@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from captcha import captcha_handle
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, db
+from models import User, db, ScheduleType
 from flask_login import login_required, logout_user, login_user, current_user
 import sqlalchemy
 
@@ -63,6 +63,22 @@ def register_process():
         
         db.session.add(user)
         db.session.commit()
+
+        colors = (
+            ('sleep', '#666DCB', '#fff'),
+            ('study', '#3ABBC9', '#222'),
+            ('work', '#9BCA3E', '#222'),
+            ('break', '#FEEB51', '#fff'),
+            ('exercise', '#FF8C00', '#222'),
+            ('other', '#D2042D', '#fff'),            
+        )
+    
+        for color in colors:
+            schedule_type = ScheduleType(description=color[0], background_color_hex=color[1], text_color_hex=color[2], user_id=user.id)
+            db.session.add(schedule_type)
+
+        db.session.commit()
+
     except sqlalchemy.exc.IntegrityError:
         flash('نام کاربری تکراری است.', 'danger')
         return redirect(url_for('auth.register_show')) 

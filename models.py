@@ -18,19 +18,17 @@ class DataClassEncoder(json.JSONEncoder):
             if isinstance(o, enum.Enum):
                 return o.name
             return super().default(o)
+        
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 @dataclass
 class User(UserMixin, db.Model):
-    id: int
-    username: str
-    password: str
-    name: str
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(unique=True)
+    password: Mapped[str] = mapped_column()
+    name: Mapped[str] = mapped_column()
 
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, unique=True)
-    password = db.Column(db.String)
-    name = db.Column(db.String)
-
+'''
 class ScheduleEnum(enum.Enum): 
     SLEEP = 'خواب'
     STUDY = 'درس خواندن'
@@ -38,37 +36,39 @@ class ScheduleEnum(enum.Enum):
     BREAK = 'استراحت'
     EXERCISE = 'ورزش'
     OTHER = 'سایر'
+'''
+
+@dataclass
+class ScheduleType(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str] = mapped_column()
+    background_color_hex: Mapped[str] = mapped_column()
+    text_color_hex: Mapped[str] = mapped_column()
+    user_id: Mapped[int] = mapped_column(db.ForeignKey(User.id))
+    
+    user = db.relationship(User)
 
 @dataclass
 class Schedule(db.Model):
-    id: int
-    start: datetime
-    end: datetime
-    description: str
-    type: ScheduleEnum
-
-    id = db.Column(db.Integer, primary_key=True)
-    start = db.Column(db.DateTime)
-    end = db.Column(db.DateTime)
-    description = db.Column(db.String)
-    type = db.Column(db.Enum(ScheduleEnum))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    start: Mapped[datetime] = mapped_column()
+    end: Mapped[datetime] = mapped_column()
+    description: Mapped[str] = mapped_column()
+    type: Mapped[ScheduleType] = db.relationship(ScheduleType)
+    type_id: Mapped[int] = mapped_column(db.ForeignKey(ScheduleType.id))
     
-    user_id = db.Column(db.ForeignKey(User.id))
+    user_id = mapped_column(db.ForeignKey(User.id))
     user = db.relationship(User)
+
 
 @dataclass
 class Goal(db.Model):
-    id: int
-    deadline: datetime
-    description: str
+    id: Mapped[int] = mapped_column(primary_key=True)
+    deadline: Mapped[datetime] = mapped_column()
+    description: Mapped[str] = mapped_column()
 
-    id = db.Column(db.Integer, primary_key=True)
-    deadline = db.Column(db.DateTime)
-    description = db.Column(db.String)
-    
-    user_id = db.Column(db.ForeignKey(User.id))
+    user_id = mapped_column(db.ForeignKey(User.id))
     user = db.relationship(User)
-
 
 class ExamEnum(enum.Enum): 
     TEST = 'چهار گزینه ای'

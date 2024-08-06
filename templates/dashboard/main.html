@@ -16,13 +16,15 @@
 <script>
   let server_data = {{ today_schedules| safe }}
 
+  console.log(server_data)
+  
   server_data = server_data.map((entry) => {
     return {
       start: new Date(entry['start'] * 1000),
       end: new Date(entry['end'] * 1000),
       title: entry['description'],
       id: entry['id'],
-      className: 'item-' + entry['type'].toLowerCase(),
+      className: 'item-' + entry['type']['id'],
     }
   })
 
@@ -90,35 +92,11 @@
     color: var(--fc-event-text-color), inherit !important;
   }
 
-
-  .item-sleep {
-    background-color: #666DCB;
-    color: #fff;
+  {% for schedule_type in schedule_types %}
+  .item-{{ schedule_type.id }} {
+    background-color: {{ schedule_type.background_color_hex }};
+    color: {{ schedule_type.text_color_hex }};
   }
-
-  .item-study {
-    background-color: #3ABBC9;
-    color: #222;
-  }
-
-  .item-work {
-    background-color: #9BCA3E;
-    color: #222;
-  }
-
-  .item-break {
-    background-color: #FEEB51;
-    color: #222;
-  }
-
-  .item-exercise {
-    background-color: #FF8C00;
-    color: #222;
-  }
-
-  .item-other {
-    background-color: #D2042D;
-    color: #fff;
-  }
+  {% endfor %}
 </style>
 {% endblock %}

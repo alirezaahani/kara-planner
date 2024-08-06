@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from models import db, Schedule, DataClassEncoder, ScheduleEnum, Goal, ExamResult, ExamEnum
+from models import db, Schedule, DataClassEncoder, Goal, ExamResult, ExamEnum, ScheduleType
 import datetime
 import json
 import itertools
@@ -24,8 +24,11 @@ def main():
     week_goals = db.session.query(Goal) \
         .filter(Goal.deadline > now) \
         .filter_by(user_id=current_user.id).all()
+    
+    schedule_types = db.session.query(ScheduleType) \
+        .filter_by(user_id=current_user.id).all()
 
-    return render_template('dashboard/main.html', today_schedules=json.dumps(query, cls=DataClassEncoder), week_goals=week_goals)
+    return render_template('dashboard/main.html', today_schedules=json.dumps(query, cls=DataClassEncoder), week_goals=week_goals, schedule_types=schedule_types)
 
 @dashboard.route('/dashboard/edit', methods=['GET'])
 @login_required
@@ -39,8 +42,11 @@ def edit_today():
             .filter(Schedule.start.between(last_month, next_month)) \
             .filter(Schedule.end.between(last_month, next_month)) \
             .filter_by(user_id=current_user.id).all()
+    
+    schedule_types = db.session.query(ScheduleType) \
+        .filter_by(user_id=current_user.id).all()
 
-    return render_template('dashboard/edit.html', today_schedules=json.dumps(query, cls=DataClassEncoder))
+    return render_template('dashboard/edit.html', today_schedules=json.dumps(query, cls=DataClassEncoder), schedule_types=schedule_types)
 
 @dashboard.route('/dashboard/edit/add', methods=['POST'])
 @login_required
@@ -48,12 +54,15 @@ def add_schedule():
     start = datetime.datetime.fromtimestamp(int(request.form.get('start')) / 1000.0)
     end =  datetime.datetime.fromtimestamp(int(request.form.get('end')) / 1000.0)
     description = request.form.get('description')
-    type = ScheduleEnum[request.form.get('type')]
 
+    type = db.session.query(ScheduleType) \
+            .filter(ScheduleType.id == int(request.form.get('type', 0))) \
+            .filter_by(user_id=current_user.id).one()
+    
     schedule = Schedule(start=start, 
                         end=end, 
                         description=description,
-                        type=type,
+                        type_id=type.id,
                         user_id=current_user.id)
     
     db.session.add(schedule)
@@ -68,13 +77,16 @@ def update_schedule():
     start = datetime.datetime.fromtimestamp(int(request.form.get('start')) / 1000.0)
     end =  datetime.datetime.fromtimestamp(int(request.form.get('end')) / 1000.0)
     description = request.form.get('description')
-    type = ScheduleEnum[request.form.get('type')]
+
+    type = db.session.query(ScheduleType) \
+        .filter(ScheduleType.id == int(request.form.get('type', 0))) \
+        .filter_by(user_id=current_user.id).one()
 
     db.session.query(Schedule).filter_by(user_id=current_user.id, id=id).update({
         'start': start,
         'end': end,
         'description': description,
-        'type': type    
+        'type_id': type.id    
     })
 
     db.session.commit()
