@@ -77,7 +77,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/fa.global.min.js"></script>
 
 <script>
-  let server_data = {{ today_schedules| safe }}
+    fetch("{{ url_for("dashboard.get_schedules") }}").then(res => res.json()).then(server_data => { 
 
   server_data = server_data.map((entry) => {
     return {
@@ -89,8 +89,6 @@
     }
   })
 
-
-  document.addEventListener('DOMContentLoaded', function () {
     var calendarEl = document.getElementById('calendar');
     var calendar = new FullCalendar.Calendar(calendarEl, {
       initialView: 'timeGridDay',
@@ -244,7 +242,7 @@
       },
     });
     calendar.render();
-  });
+})
 </script>
 
 <style>

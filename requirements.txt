@@ -21,3 +21,5 @@ typing-extensions==4.12.2
 Werkzeug==3.0.3
 xxhash==3.4.1
 zipp==3.19.2
+icalendar
+requests

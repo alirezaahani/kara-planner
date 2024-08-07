@@ -13,44 +13,6 @@
 
 <br>
 
-<script>
-  let server_data = {{ today_schedules| safe }}
-
-  console.log(server_data)
-  
-  server_data = server_data.map((entry) => {
-    return {
-      start: new Date(entry['start'] * 1000),
-      end: new Date(entry['end'] * 1000),
-      title: entry['description'],
-      id: entry['id'],
-      className: 'item-' + entry['type']['id'],
-    }
-  })
-
-
-  document.addEventListener('DOMContentLoaded', function () {
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: 'timeGridDay',
-      locale: 'fa',
-      events: server_data,
-      slotDuration: '00:15:00',
-      themeSystem: 'bootstrap5',
-      nowIndicator: true,
-      allDaySlot: false,
-      aspectRatio: 2,
-
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-      },
-    });
-    calendar.render();
-  });
-</script>
-
 <h2>اهداف</h2>
 
 <div class="table-responsive">
@@ -84,6 +46,40 @@
   })
 </script>
 
+
+<script>
+  fetch("{{ url_for("dashboard.get_schedules") }}").then(res => res.json()).then(server_data => { 
+
+    server_data = server_data.map((entry) => {
+      return {
+        start: new Date(entry['start'] * 1000),
+        end: new Date(entry['end'] * 1000),
+        title: entry['description'],
+        id: entry['id'],
+        className: 'item-' + entry['type']['id'],
+      }
+    })
+
+    var calendarEl = document.getElementById('calendar');
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'timeGridDay',
+      locale: 'fa',
+      events: server_data,
+      slotDuration: '00:15:00',
+      themeSystem: 'bootstrap5',
+      nowIndicator: true,
+      allDaySlot: false,
+      aspectRatio: 2,
+
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+      },
+    });
+    calendar.render();
+  });
+</script>
 
 
 

@@ -62,6 +62,7 @@
 </div>
 </div>
 
+</div>
 <div class="accordion-item">
   <h2 class="accordion-header" id="name">
       <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -96,9 +97,79 @@
       </div>
   </div>
 </div>
+
+
+<div class="accordion-item">
+  <h2 class="accordion-header" id="ics-import">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+          data-bs-target="#collapse-ics-import" aria-expanded="false" aria-controls="collapse-ics-import">
+          ورود تقویم از Google Calendar (iCalendar format)
+      </button>
+  </h2>
+  <div id="collapse-ics-import" class="accordion-collapse collapse" aria-labelledby="ics-import"
+      data-bs-parent="#accordionPercentage">
+      <div class="accordion-body">
+          <div class="input-group mb-3">
+  
+      <div class="form-floating">
+        <input type="text" class="form-control" id="url" name="url" placeholder="url" required>
+        <label for="url">آدرس فایل ics</label>
+
+      </div>
+      
+      
+      
+    </div>
+    <button class="w-100 btn btn-lg btn-primary" id="importIcs">تایید</button>
+
+    <div class="d-none align-items-center mt-3" id="loading-spinner">
+      
+        <strong role="status">در حال بارگذاری ...</strong>
+        <div class="spinner-border ms-auto" aria-hidden="true"></div>
+    </div>
+      </div>
   </div>
+</div>
 </div>
 {% endblock %}
 
 {% block code %}
+<script>
+  function showAlert(message, category) {
+    document.querySelector('main').insertAdjacentHTML("afterbegin",  `
+    <div class="alert alert-${category} mt-3 alert-dismissible fade show" role="alert">
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    `);
+  }
+
+  document.getElementById("importIcs").addEventListener("click", function (event) {   
+    event.preventDefault();
+    const url = document.getElementById("url").value.trim();
+
+    if(url == '') {
+      showAlert("لطفا آدرس فایل ics به درستی وارد کنید.", "danger");
+      return;
+    }
+    
+    document.getElementById("loading-spinner").classList.remove("d-none");
+    document.getElementById("loading-spinner").classList.add("d-flex");
+    event.target.disabled = true;
+    
+    fetch("{{ url_for('dashboard.import_ics') }}?url=" + encodeURIComponent(url))
+      .then(res => res.json())
+      .then(res => {
+        document.getElementById("loading-spinner").classList.add("d-none");
+        document.getElementById("loading-spinner").classList.remove("d-flex");
+        event.target.disabled = false;
+
+        if(res.ok) {
+          showAlert("ورود تقویم با موفقیت انجام شد.", "success")          
+        } else {
+          showAlert("لطفا آدرس فایل ics به درستی وارد کنید.", "danger")
+        }
+      })
+  }, { capture: true });
+</script>
 {% endblock %}

@@ -5,14 +5,11 @@ import datetime
 import json
 import itertools
 
-from sqlalchemy.sql import functions
-
 dashboard = Blueprint('dashboard', __name__)
 
-@dashboard.route('/dashboard', methods=['GET'])
+@dashboard.route('/dashboard/get_schedules', methods=['GET'])
 @login_required
-def main():
-    now = datetime.datetime.now()
+def get_schedules():
     today = datetime.date.today()
     first = today.replace(day=1)
     last_month = first - datetime.timedelta(days=1)
@@ -21,7 +18,15 @@ def main():
     query = db.session.query(Schedule) \
             .filter(Schedule.start.between(last_month, next_month)) \
             .filter(Schedule.end.between(last_month, next_month)) \
-            .filter_by(user_id=current_user.id).all()
+            .filter_by(user_id=current_user.id) \
+            .order_by(Schedule.start).all()
+
+    return json.dumps(query, cls=DataClassEncoder)
+
+@dashboard.route('/dashboard', methods=['GET'])
+@login_required
+def main():
+    now = datetime.datetime.now()
     
     week_goals = db.session.query(Goal) \
         .filter(Goal.deadline > now) \
@@ -30,25 +35,15 @@ def main():
     schedule_types = db.session.query(ScheduleType) \
         .filter_by(user_id=current_user.id).all()
 
-    return render_template('dashboard/main.html', today_schedules=json.dumps(query, cls=DataClassEncoder), week_goals=week_goals, schedule_types=schedule_types)
+    return render_template('dashboard/main.html', week_goals=week_goals, schedule_types=schedule_types)
 
 @dashboard.route('/dashboard/edit', methods=['GET'])
 @login_required
 def edit_today():
-    today = datetime.date.today()
-    first = today.replace(day=1)
-    last_month = first - datetime.timedelta(days=1)
-    next_month = first + datetime.timedelta(days=32)
-
-    query = db.session.query(Schedule) \
-            .filter(Schedule.start.between(last_month, next_month)) \
-            .filter(Schedule.end.between(last_month, next_month)) \
-            .filter_by(user_id=current_user.id).all()
-    
     schedule_types = db.session.query(ScheduleType) \
         .filter_by(user_id=current_user.id).all()
 
-    return render_template('dashboard/edit.html', today_schedules=json.dumps(query, cls=DataClassEncoder), schedule_types=schedule_types)
+    return render_template('dashboard/edit.html', schedule_types=schedule_types)
 
 @dashboard.route('/dashboard/edit/add', methods=['POST'])
 @login_required
@@ -261,3 +256,38 @@ def delete_exam_result():
 @login_required
 def change_info():
     return render_template('dashboard/change-info.html')
+
+
+import requests
+import icalendar
+import datetime
+
+@dashboard.route('/dashboard/import_ics', methods=['POST', 'GET'])
+@login_required
+def import_ics():
+    url = request.form.get('url')
+    if not url:
+        url = request.args.get('url')
+    
+    print(url)
+
+    try:
+        text = requests.get(url).text
+    except requests.exceptions.RequestException as e:
+        return { 'ok': False, 'error': e.strerror }
+    
+    calendar = icalendar.Calendar.from_ical(text)
+
+    events = []
+    for event in calendar.walk('VEVENT'):
+        start = icalendar.vDDDTypes.from_ical(event.get('DTSTART'), timezone='Asia/Tehran')
+        end = icalendar.vDDDTypes.from_ical(event.get('DTEND'), timezone='Asia/Tehran')
+        if not isinstance(start, datetime.datetime) or not isinstance(end, datetime.datetime):
+            continue
+        text = event.get('SUMMARY') or "NO DESC"
+        events.append(Schedule(start=start, end=end, description=text, type_id=1, user_id=current_user.id))
+
+    db.session.bulk_save_objects(events)
+    db.session.commit()
+    
+    return {'ok': True}

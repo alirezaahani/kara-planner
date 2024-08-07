@@ -65,6 +65,7 @@ def register_process():
         db.session.commit()
 
         colors = (
+            ('unknown', '#222', '#fff'),
             ('sleep', '#666DCB', '#fff'),
             ('study', '#3ABBC9', '#222'),
             ('work', '#9BCA3E', '#222'),
