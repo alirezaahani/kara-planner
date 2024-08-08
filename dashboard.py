@@ -259,8 +259,9 @@ def change_info():
 
 
 import requests
-import icalendar
 import datetime
+from ics import Calendar, Timezone
+from ics.timespan import NormalizationAction
 
 @dashboard.route('/dashboard/import_ics', methods=['POST', 'GET'])
 @login_required
@@ -276,16 +277,18 @@ def import_ics():
     except requests.exceptions.RequestException as e:
         return { 'ok': False, 'error': e.strerror }
     
-    calendar = icalendar.Calendar.from_ical(text)
+    calendar = Calendar(text)
+
+    calendar.normalize(
+        Timezone.from_tzinfo(datetime.datetime.now().astimezone().tzinfo),
+        normalize_floating=NormalizationAction.REPLACE,
+        normalize_with_tz=NormalizationAction.CONVERT)
+
 
     events = []
-    for event in calendar.walk('VEVENT'):
-        start = icalendar.vDDDTypes.from_ical(event.get('DTSTART'), timezone='Asia/Tehran')
-        end = icalendar.vDDDTypes.from_ical(event.get('DTEND'), timezone='Asia/Tehran')
-        if not isinstance(start, datetime.datetime) or not isinstance(end, datetime.datetime):
-            continue
-        text = event.get('SUMMARY') or "NO DESC"
-        events.append(Schedule(start=start, end=end, description=text, type_id=1, user_id=current_user.id))
+    for event in calendar.events:
+        desc = event.summary or "NO DESC"
+        events.append(Schedule(start=event.begin, end=event.end, description=desc, type_id=1, user_id=current_user.id))
 
     db.session.bulk_save_objects(events)
     db.session.commit()
