@@ -1,0 +1,6 @@
+Flask
+flask-simple-captcha
+Flask-SQLAlchemy
+flask-login
+requests
+ics @ git+https://github.com/ics-py/ics-py.git
