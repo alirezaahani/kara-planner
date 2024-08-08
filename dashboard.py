@@ -152,9 +152,8 @@ def percentage():
 @login_required
 def graphs():
     now = datetime.datetime.now()
-    
-    start = (now - datetime.timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
-    end = (start + datetime.timedelta(days=6)).replace(hour=23, minute=59, second=59)
+    start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    end = (start.replace(month=start.month + 1, day=1) - datetime.timedelta(seconds=1)).replace(hour=23, minute=59, second=59)
 
     schedules = db.session.query(Schedule) \
             .filter(Schedule.start.between(start, end)) \
@@ -269,8 +268,6 @@ def import_ics():
     url = request.form.get('url')
     if not url:
         url = request.args.get('url')
-    
-    print(url)
 
     try:
         text = requests.get(url).text
