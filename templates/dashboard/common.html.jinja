@@ -38,52 +38,28 @@
     </div>
   </header>
 
+  {% macro nav_item(endpoint, name, active_page, current_page) %}
+    <li class="nav-item">
+      <a class="nav-link {{ 'active' if active_page == current_page }}" href="{{ url_for(endpoint) }}">
+        {{ name }}
+      </a>
+    </li>
+  {% endmacro %}
+
+
   <div class="container-fluid">
     <div class="row">
       <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
         <div class="position-sticky pt-3 sidebar-sticky">
           <ul class="nav flex-column">
-            <li class="nav-item">
-              <a class="nav-link {{ 'active' if active_page == 'main' }}" href="{{ url_for('dashboard.main') }}">
-                پیشخوان
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {{ 'active' if active_page == 'edit_today' }}"
-                href="{{ url_for('dashboard.edit_today') }}">
-                ویرایش برنامه ریزی
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {{ 'active' if active_page == 'edit_goal' }}"
-                href="{{ url_for('dashboard.edit_goal') }}">
-                ویراش اهداف
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {{ 'active' if active_page == 'graphs' }}"
-                href="{{ url_for('dashboard.graphs') }}">
-                نمودار های برنامه ریزی
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {{ 'active' if active_page == 'percentage' }}"
-                href="{{ url_for('dashboard.percentage') }}">
-                محاسبه درصد
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {{ 'active' if active_page == 'exam_results' }}"
-                href="{{ url_for('dashboard.exam_results') }}">
-                ثبت و بررسی نتایج آزمون ها
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link {{ 'active' if active_page == 'change_info' }}"
-                href="{{ url_for('dashboard.change_info') }}">
-                تغییر اطلاعات کاربری
-              </a>
-            </li>
+            {{ nav_item('dashboard.main', 'پیشخوان', 'main', active_page) }}
+            {{ nav_item('dashboard.edit_schedule', 'ویرایش برنامه ریزی', 'edit_schedule', active_page) }}
+            {{ nav_item('dashboard.goals', 'ویراش اهداف', 'goals', active_page) }}
+            {{ nav_item('dashboard.graphs', 'نمودار های برنامه ریزی', 'graphs', active_page) }}
+            {{ nav_item('dashboard.grade_calculator', 'محاسبه درصد', 'grade_calculator', active_page) }}
+            {{ nav_item('dashboard.exam_results', 'ثبت و بررسی نتایج آزمون ها', 'exam_results', active_page) }}
+            {{ nav_item('dashboard.weekly_plans', 'برنامه ریزی هفتگی', 'weekly_plans', active_page) }}
+            {{ nav_item('dashboard.settings', 'تنظیمات', 'settings', active_page) }}
           </ul>
         </div>
       </nav>

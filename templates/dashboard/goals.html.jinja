@@ -1,5 +1,5 @@
-{% extends 'dashboard/common.html' %}
-{% set active_page = 'edit_goal' %}
+{% extends 'dashboard/common.html.jinja' %}
+{% set active_page = 'goals' %}
 
 
 {% block title %}ویرایش اهداف{% endblock %}
@@ -24,7 +24,7 @@
         <h1 class="modal-title fs-5" id="goalModalLabel">افزودن/ویرایش هدف</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="{{ url_for('dashboard.update_add_goal') }}" method="POST">
+      <form action="{{ url_for('dashboard.update_goal') }}" method="POST">
         <div class="modal-body">
           
           <div class="input-group mb-3" id="id-group">
@@ -105,11 +105,11 @@
     document.querySelector('input[name="date"]').value = moment.from(e.target.value, 'fa', 'YYYY/MM/DD hh:mm:ss').format('YYYY/MM/DD hh:mm:ss')
   })
 </script>
-  <script>
-    document.querySelectorAll('.goal-deadlines').forEach(el => {
-      el.innerText = moment(new Date(el.getAttribute('goal-deadline'))).locale('fa').format('YYYY/MM/DD hh:mm:ss')
-    })
-  </script>
+<script>
+  document.querySelectorAll('.goal-deadlines').forEach(el => {
+    el.innerText = moment(new Date(el.getAttribute('goal-deadline'))).locale('fa').format('YYYY/MM/DD hh:mm:ss')
+  })
+</script>
 
 <script>
   const goalModal = document.getElementById('goalModal')

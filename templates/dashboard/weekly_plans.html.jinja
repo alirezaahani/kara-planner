@@ -1,0 +1,43 @@
+{% extends 'dashboard/common.html.jinja' %}
+{% set active_page = 'weekly_plans' %}
+
+
+{% block title %}برنامه ریزی هفتگی{% endblock %}
+{% block header %}برنامه ریزی هفتگی{% endblock %}
+
+{% block toolbar %}
+{% endblock %}
+
+{% block content %}
+<div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          {% for type in plan_types %}
+          <th scope="col" style="background-color: {{ type.background_color_hex }}; color: {{ type.text_color_hex }}">{{ type.description }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+      {% for day_info in week_matrix %}
+          <tr>
+              <td class="day-date" day-date="{{ day_info[0] }}"></td>
+              {% for duration in day_info[1] %}
+                  <td><input type="text" value="{{ duration }}" class="form-control"> </td>
+              {% endfor %}
+          </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
+
+  
+{% block code %}
+<script>
+  document.querySelectorAll('.day-date').forEach(el => {
+    el.innerText = moment(new Date(el.getAttribute('day-date'))).locale('fa').format('YYYY/MM/DD')
+  })
+</script>
+{% endblock %}

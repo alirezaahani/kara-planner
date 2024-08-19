@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
-from models import db, Schedule, DataClassEncoder, Goal, ExamResult, ScheduleType, ExamType
+from models import db, Schedule, DataClassEncoder, Goal, ExamResult, ScheduleType, ExamType, Plan, PlanType
 import datetime
 import json
 import itertools
@@ -35,17 +35,17 @@ def main():
     schedule_types = db.session.query(ScheduleType) \
         .filter_by(user_id=current_user.id).all()
 
-    return render_template('dashboard/main.html', week_goals=week_goals, schedule_types=schedule_types)
+    return render_template('dashboard/main.html.jinja', week_goals=week_goals, schedule_types=schedule_types)
 
-@dashboard.route('/dashboard/edit', methods=['GET'])
+@dashboard.route('/dashboard/edit_schedule', methods=['GET'])
 @login_required
-def edit_today():
+def edit_schedule():
     schedule_types = db.session.query(ScheduleType) \
         .filter_by(user_id=current_user.id).all()
 
-    return render_template('dashboard/edit.html', schedule_types=schedule_types)
+    return render_template('dashboard/edit_schedule.html.jinja', schedule_types=schedule_types)
 
-@dashboard.route('/dashboard/edit/add', methods=['POST'])
+@dashboard.route('/dashboard/edit_schedule/add', methods=['POST'])
 @login_required
 def add_schedule():
     start = datetime.datetime.fromtimestamp(int(request.form.get('start')) / 1000.0)
@@ -67,7 +67,7 @@ def add_schedule():
     
     return {'id': schedule.id}
 
-@dashboard.route('/dashboard/edit/update', methods=['POST'])
+@dashboard.route('/dashboard/edit_schedule/update', methods=['POST'])
 @login_required
 def update_schedule():
     id = int(request.form.get('id'))
@@ -91,7 +91,7 @@ def update_schedule():
     return {'ok': True}
 
 
-@dashboard.route('/dashboard/edit/delete', methods=['POST'])
+@dashboard.route('/dashboard/edit_schedule/delete', methods=['POST'])
 @login_required
 def delete_schedule():
     id = int(request.form.get('id'))
@@ -102,20 +102,20 @@ def delete_schedule():
     return {'ok': True}
 
 
-@dashboard.route('/dashboard/goal', methods=['GET'])
+@dashboard.route('/dashboard/goals', methods=['GET'])
 @login_required
-def edit_goal():
+def goals():
     now = datetime.datetime.now()
 
     query = db.session.query(Goal) \
             .filter(Goal.deadline > now) \
             .filter_by(user_id=current_user.id).all()
 
-    return render_template('dashboard/goal.html', week_goals=query)
+    return render_template('dashboard/goals.html.jinja', week_goals=query)
 
-@dashboard.route('/dashboard/update_add_goal', methods=['POST'])
+@dashboard.route('/dashboard/edit_goals/update', methods=['POST'])
 @login_required
-def update_add_goal():
+def update_goal():
     id = (request.form.get('id').strip())
     description = request.form.get('description').strip()
     date = datetime.datetime.strptime(request.form.get('date'), '%Y/%m/%d %H:%M:%S')
@@ -130,9 +130,9 @@ def update_add_goal():
         db.session.add(goal)
 
     db.session.commit()
-    return redirect(url_for('dashboard.edit_goal'))
+    return redirect(url_for('dashboard.goals'))
 
-@dashboard.route('/dashboard/delete_goal', methods=['GET'])
+@dashboard.route('/dashboard/edit_goals/delete', methods=['GET'])
 @login_required
 def delete_goal():
     id = (request.args.get('id').strip())
@@ -140,13 +140,13 @@ def delete_goal():
     db.session.query(Goal).filter_by(user_id=current_user.id, id=id).delete()
     db.session.commit()
 
-    return redirect(url_for('dashboard.edit_goal'))
+    return redirect(url_for('dashboard.goals'))
 
 
-@dashboard.route('/dashboard/percentage', methods=['GET'])
+@dashboard.route('/dashboard/grade_calculator', methods=['GET'])
 @login_required
-def percentage():
-    return render_template('dashboard/percentage.html')
+def grade_calculator():
+    return render_template('dashboard/grade_calculator.html.jinja')
 
 @dashboard.route('/dashboard/graphs', methods=['GET'])
 @login_required
@@ -189,7 +189,7 @@ def graphs():
             'per_day_total': per_day_total
         })
         
-    return render_template('dashboard/graphs.html', data=json.dumps(data, cls=DataClassEncoder))
+    return render_template('dashboard/graphs.html.jinja', data=json.dumps(data, cls=DataClassEncoder))
 
 
 
@@ -219,10 +219,10 @@ def exam_results():
             'result': list(group)
         })
 
-    return render_template('dashboard/exam-results.html', data=json.dumps(data, cls=DataClassEncoder), exam_types=exam_types)
+    return render_template('dashboard/exam_results.html.jinja', data=json.dumps(data, cls=DataClassEncoder), exam_types=exam_types)
 
 
-@dashboard.route('/dashboard/add_exam_result', methods=['POST'])
+@dashboard.route('/dashboard/edit_exam_results/add', methods=['POST'])
 @login_required
 def add_exam_result():
     type = db.session.query(ExamType) \
@@ -240,7 +240,7 @@ def add_exam_result():
 
     return redirect(url_for('dashboard.exam_results'))
 
-@dashboard.route('/dashboard/delete_exam_result', methods=['GET'])
+@dashboard.route('/dashboard/edit_exam_results/delete', methods=['GET'])
 @login_required
 def delete_exam_result():
     id = (request.args.get('id').strip())
@@ -251,10 +251,10 @@ def delete_exam_result():
     return redirect(url_for('dashboard.exam_results'))
 
 
-@dashboard.route('/dashboard/change_info', methods=['GET'])
+@dashboard.route('/dashboard/settings', methods=['GET'])
 @login_required
-def change_info():
-    return render_template('dashboard/change-info.html')
+def settings():
+    return render_template('dashboard/settings.html.jinja')
 
 
 import requests
@@ -291,3 +291,56 @@ def import_ics():
     db.session.commit()
     
     return {'ok': True}
+
+import logging
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
+from sqlalchemy.orm import joinedload
+from random import randint
+
+@dashboard.route('/dashboard/weekly_plans', methods=['GET'])
+@login_required
+def weekly_plans():
+    now = datetime.datetime.now()
+
+    last_saturday = now - datetime.timedelta(days=(now.weekday() + 2) % 7 + 1)
+    last_saturday = last_saturday.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    next_friday = last_saturday + datetime.timedelta(days=6)
+    next_friday = next_friday.replace(hour=23, minute=59, second=59)
+
+    week_plans = db.session.query(Plan) \
+            .options(joinedload(Plan.type)) \
+            .filter(Plan.date >= last_saturday) \
+            .filter(Plan.date <= next_friday) \
+            .filter_by(user_id=current_user.id).all()
+    
+    plan_types = db.session.query(PlanType) \
+            .filter_by(user_id=current_user.id).all()
+
+    # Step 1: Initialize the matrix (7 days x (1 + len(plan_types)))
+    num_plan_types = len(plan_types)
+    week_matrix = [[(last_saturday + datetime.timedelta(days=i)), [datetime.timedelta(0) for _ in range(num_plan_types)]] for i in range(7)]
+    
+    # Step 2: Map weekdays from Saturday to Friday (already accounted by initialization)
+    weekday_order = {
+        5: 0,  # Saturday -> 0
+        6: 1,  # Sunday -> 1
+        0: 2,  # Monday -> 2
+        1: 3,  # Tuesday -> 3
+        2: 4,  # Wednesday -> 4
+        3: 5,  # Thursday -> 5
+        4: 6,  # Friday -> 6
+    }
+    
+    # Step 3: Populate the matrix
+    type_id_to_index = {ptype.id: index for index, ptype in enumerate(plan_types)}
+
+    for plan in week_plans:
+        day_of_week = plan.date.weekday()
+        day_index = weekday_order[day_of_week]
+        type_index = type_id_to_index[plan.type_id]
+        week_matrix[day_index][1][type_index] += plan.duration
+
+    return render_template('dashboard/weekly_plans.html.jinja', week_matrix=week_matrix, plan_types=plan_types)

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from captcha import captcha_handle
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, db, ScheduleType, ExamType
+from models import User, db, ScheduleType, ExamType, PlanType
 from flask_login import login_required, logout_user, login_user, current_user
 import sqlalchemy
 
@@ -28,7 +28,7 @@ def register_show():
         return redirect(url_for('dashboard.main'))
 
     captcha = captcha_handle.create(length=5)
-    return render_template('auth/register.html', captcha=captcha)
+    return render_template('auth/register.html.jinja', captcha=captcha)
 
 REGISTER_FIELDS = {'username', 'password', 'passwordRep', 'name', 'captcha-hash', 'captcha-text'}
 
@@ -64,29 +64,35 @@ def register_process():
         db.session.add(user)
         db.session.commit()
 
-        colors = (
-            ('unknown', '#222', '#fff'),
-            ('sleep', '#666DCB', '#fff'),
-            ('study', '#3ABBC9', '#222'),
-            ('work', '#9BCA3E', '#222'),
-            ('break', '#FEEB51', '#fff'),
-            ('exercise', '#FF8C00', '#222'),
-            ('other', '#D2042D', '#fff'),            
-        )
-    
-        for color in colors:
-            schedule_type = ScheduleType(description=color[0], background_color_hex=color[1], text_color_hex=color[2], user_id=user.id)
-            db.session.add(schedule_type)
+        schedule_types = [
+            ScheduleType(description='unknown', background_color_hex='#222', text_color_hex='#fff', user_id=user.id),
+            ScheduleType(description='sleep', background_color_hex='#666DCB', text_color_hex='#fff', user_id=user.id),
+            ScheduleType(description='study', background_color_hex='#3ABBC9', text_color_hex='#222', user_id=user.id),
+            ScheduleType(description='work', background_color_hex='#9BCA3E', text_color_hex='#222', user_id=user.id),
+            ScheduleType(description='break', background_color_hex='#FEEB51', text_color_hex='#fff', user_id=user.id),
+            ScheduleType(description='exercise', background_color_hex='#FF8C00', text_color_hex='#222', user_id=user.id),
+            ScheduleType(description='other', background_color_hex='#D2042D', text_color_hex='#fff', user_id=user.id)
+        ]
 
-        exams = (
-            ('test', '#666DCB'),
-            ('quiz', '#3ABBC9'),
-            ('essay', '#9BCA3E'),        
-        )
-    
-        for exam in exams:
-            exam_type = ExamType(description=exam[0], color_hex=exam[1], user_id=user.id)
-            db.session.add(exam_type)
+        plan_types = [
+            PlanType(description='unknown', background_color_hex='#222', text_color_hex='#fff', user_id=user.id),
+            PlanType(description='sleep', background_color_hex='#666DCB', text_color_hex='#fff', user_id=user.id),
+            PlanType(description='study', background_color_hex='#3ABBC9', text_color_hex='#222', user_id=user.id),
+            PlanType(description='work', background_color_hex='#9BCA3E', text_color_hex='#222', user_id=user.id),
+            PlanType(description='break', background_color_hex='#FEEB51', text_color_hex='#fff', user_id=user.id),
+            PlanType(description='exercise', background_color_hex='#FF8C00', text_color_hex='#222', user_id=user.id),
+            PlanType(description='other', background_color_hex='#D2042D', text_color_hex='#fff', user_id=user.id)
+        ]
+
+        exam_types = [
+            ExamType(description='test', color_hex='#666DCB', user_id=user.id),
+            ExamType(description='quiz', color_hex='#3ABBC9', user_id=user.id),
+            ExamType(description='essay', color_hex='#9BCA3E', user_id=user.id)
+        ]
+
+        db.session.bulk_save_objects(schedule_types)
+        db.session.bulk_save_objects(exam_types)
+        db.session.bulk_save_objects(plan_types)
 
         db.session.commit()
 
@@ -102,7 +108,7 @@ def login_show():
     if current_user.is_authenticated:
         return redirect(request.form.get('next', '') or url_for('dashboard.main'))
 
-    return render_template('auth/login.html')
+    return render_template('auth/login.html.jinja')
 
 LOGIN_FIELDS = {'username', 'password'}
 
@@ -148,19 +154,19 @@ def change_auth_process():
     
     if len(response_validation) < len(CHANGE_AUTH_FIELDS):
         flash('برخی ورودی ها پر نشده اند', 'danger')
-        return redirect(url_for('dashboard.change_info'))
+        return redirect(url_for('dashboard.settings'))
 
     if not check_password_hash(current_user.password, request.form.get('password')):
         flash('رمز عبور فعلی به درستی وارد نشده است.', 'danger')
-        return redirect(url_for('dashboard.change_info'))
+        return redirect(url_for('dashboard.settings'))
 
     if request.form.get('newPassword') != request.form.get('newPasswordRep'):
         flash('رمز عبور جدید به درستی تکرار نشده است.', 'danger')
-        return redirect(url_for('dashboard.change_info'))
+        return redirect(url_for('dashboard.settings'))
 
     if not password_check(request.form.get('newPassword')):
         flash('رمز عبور باید شرایط ذکر شده را داشته باشد.', 'danger')
-        return redirect(url_for('dashboard.change_info')) 
+        return redirect(url_for('dashboard.settings')) 
     
     hashed_password = generate_password_hash(request.form['newPassword'], method='scrypt')
 
@@ -168,7 +174,7 @@ def change_auth_process():
     db.session.commit()
 
     flash(f'رمز عبور با موفقیت تغییر یافت!', 'success')
-    return redirect(url_for('dashboard.change_info'))
+    return redirect(url_for('dashboard.settings'))
 
 
 
@@ -181,14 +187,14 @@ def change_name_process():
     
     if len(response_validation) < len(CHANGE_NAME_FIELDS):
         flash('برخی ورودی ها پر نشده اند', 'danger')
-        return redirect(url_for('dashboard.change_info'))
+        return redirect(url_for('dashboard.settings'))
 
     if not check_password_hash(current_user.password, request.form.get('password')):
         flash('رمز عبور فعلی به درستی وارد نشده است.', 'danger')
-        return redirect(url_for('dashboard.change_info'))
+        return redirect(url_for('dashboard.settings'))
     
     db.session.query(User).filter_by(id=current_user.id).update({'name': request.form.get('name')})
     db.session.commit()
 
     flash(f'سلام {current_user.name}. نام نمایشی با موفقیت تغییر یافت!', 'success')
-    return redirect(url_for('dashboard.change_info'))
+    return redirect(url_for('dashboard.settings'))

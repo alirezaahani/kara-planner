@@ -1,9 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from dataclasses import dataclass
-from datetime import datetime, date
-from datetime import timedelta
 import enum
+import datetime
 
 db = SQLAlchemy()
 
@@ -13,7 +12,7 @@ class DataClassEncoder(json.JSONEncoder):
         def default(self, o):
             if dataclasses.is_dataclass(o):
                 return dataclasses.asdict(o)
-            if isinstance(o, (datetime, date)):
+            if isinstance(o, (datetime.datetime, datetime.timedelta, datetime.date)):
                 return o.timestamp()
             if isinstance(o, enum.Enum):
                 return o.name
@@ -28,16 +27,6 @@ class User(UserMixin, db.Model):
     password: Mapped[str] = mapped_column()
     name: Mapped[str] = mapped_column()
 
-'''
-class ScheduleEnum(enum.Enum): 
-    SLEEP = 'خواب'
-    STUDY = 'درس خواندن'
-    WORK = 'کار کردن'
-    BREAK = 'استراحت'
-    EXERCISE = 'ورزش'
-    OTHER = 'سایر'
-'''
-
 @dataclass
 class ScheduleType(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -51,8 +40,8 @@ class ScheduleType(db.Model):
 @dataclass
 class Schedule(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    start: Mapped[datetime] = mapped_column()
-    end: Mapped[datetime] = mapped_column()
+    start: Mapped[datetime.datetime] = mapped_column()
+    end: Mapped[datetime.datetime] = mapped_column()
     description: Mapped[str] = mapped_column()
     type: Mapped[ScheduleType] = db.relationship(ScheduleType)
     type_id: Mapped[int] = mapped_column(db.ForeignKey(ScheduleType.id))
@@ -64,19 +53,11 @@ class Schedule(db.Model):
 @dataclass
 class Goal(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    deadline: Mapped[datetime] = mapped_column()
+    deadline: Mapped[datetime.datetime] = mapped_column()
     description: Mapped[str] = mapped_column()
 
     user_id = mapped_column(db.ForeignKey(User.id))
     user = db.relationship(User)
-
-'''
-class ExamEnum(enum.Enum): 
-    TEST = 'چهار گزینه ای'
-    QUIZ = 'آزمونک'
-    ESSAY = 'تشریحی'
-    OTHER = 'سایر'
-'''
 
 @dataclass
 class ExamType(db.Model):
@@ -90,11 +71,33 @@ class ExamType(db.Model):
 @dataclass
 class ExamResult(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
-    date: Mapped[datetime] = mapped_column()
+    date: Mapped[datetime.datetime] = mapped_column()
     value: Mapped[float] = mapped_column()
     description: Mapped[str] = mapped_column()
     type: Mapped[ExamType] = db.relationship(ExamType)
     type_id: Mapped[int] = mapped_column(db.ForeignKey(ExamType.id))
 
+    user_id = mapped_column(db.ForeignKey(User.id))
+    user = db.relationship(User)
+
+@dataclass
+class PlanType(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    description: Mapped[str] = mapped_column()
+    background_color_hex: Mapped[str] = mapped_column()
+    text_color_hex: Mapped[str] = mapped_column()
+    user_id: Mapped[int] = mapped_column(db.ForeignKey(User.id))
+
+    user = db.relationship(User)
+
+@dataclass
+class Plan(db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    date: Mapped[datetime.date] = mapped_column()
+    duration: Mapped[datetime.timedelta] = mapped_column()
+    description: Mapped[str] = mapped_column()
+    type_id: Mapped[int] = mapped_column(db.ForeignKey(PlanType.id))
+
+    type = db.relationship(PlanType)
     user_id = mapped_column(db.ForeignKey(User.id))
     user = db.relationship(User)
