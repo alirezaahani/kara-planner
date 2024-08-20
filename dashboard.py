@@ -51,15 +51,12 @@ def add_schedule():
     start = datetime.datetime.fromtimestamp(int(request.form.get('start')) / 1000.0)
     end =  datetime.datetime.fromtimestamp(int(request.form.get('end')) / 1000.0)
     description = request.form.get('description')
-
-    type = db.session.query(ScheduleType) \
-            .filter(ScheduleType.id == int(request.form.get('type', 0))) \
-            .filter_by(user_id=current_user.id).one()
+    type_id = int(request.form.get('type', 0))
     
     schedule = Schedule(start=start, 
                         end=end, 
                         description=description,
-                        type_id=type.id,
+                        type_id=type_id,
                         user_id=current_user.id)
     
     db.session.add(schedule)
@@ -74,16 +71,13 @@ def update_schedule():
     start = datetime.datetime.fromtimestamp(int(request.form.get('start')) / 1000.0)
     end =  datetime.datetime.fromtimestamp(int(request.form.get('end')) / 1000.0)
     description = request.form.get('description')
-
-    type = db.session.query(ScheduleType) \
-        .filter(ScheduleType.id == int(request.form.get('type', 0))) \
-        .filter_by(user_id=current_user.id).one()
+    type_id = int(request.form.get('type', 0))
 
     db.session.query(Schedule).filter_by(user_id=current_user.id, id=id).update({
         'start': start,
         'end': end,
         'description': description,
-        'type_id': type.id    
+        'type_id': type_id    
     })
 
     db.session.commit()
@@ -225,15 +219,13 @@ def exam_results():
 @dashboard.route('/dashboard/edit_exam_results/add', methods=['POST'])
 @login_required
 def add_exam_result():
-    type = db.session.query(ExamType) \
-        .filter(ExamType.id == int(request.form.get('result-type', 0))) \
-        .filter_by(user_id=current_user.id).one()
+    type_id = int(request.form.get('result-type', 0))
 
     date = datetime.datetime.strptime(request.form.get('date'), '%Y/%m/%d')
     value = request.form.get('result-value')
     description = request.form.get('result-description')
 
-    result = ExamResult(date=date, type_id=type.id, value=value, user_id=current_user.id, description=description)
+    result = ExamResult(date=date, type_id=type_id, value=value, user_id=current_user.id, description=description)
     db.session.add(result)
 
     db.session.commit()
