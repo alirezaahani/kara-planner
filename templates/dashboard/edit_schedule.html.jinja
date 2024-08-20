@@ -229,8 +229,7 @@
           let formData = new FormData();
 
           name.value = ''
-          
-
+        
           formData.append('id', info.event['id']);
           fetch("{{ url_for('dashboard.delete_schedule') }}", {
             body: formData,

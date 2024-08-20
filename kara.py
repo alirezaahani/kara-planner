@@ -33,3 +33,7 @@ app.register_blueprint(index)
 app.register_blueprint(auth)
 app.register_blueprint(support)
 app.register_blueprint(dashboard)
+
+import logging
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)

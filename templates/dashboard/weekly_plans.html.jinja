@@ -10,34 +10,78 @@
 
 {% block content %}
 <div class="table-responsive">
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          {% for type in plan_types %}
-          <th scope="col" style="background-color: {{ type.background_color_hex }}; color: {{ type.text_color_hex }}">{{ type.description }}</th>
-          {% endfor %}
-        </tr>
-      </thead>
-      <tbody>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        {% for type in plan_types %}
+        <th scope="col" style="background-color: {{ type.background_color_hex }}; color: {{ type.text_color_hex }}">{{
+          type.description }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
       {% for day_info in week_matrix %}
-          <tr>
-              <td class="day-date" day-date="{{ day_info[0] }}"></td>
-              {% for duration in day_info[1] %}
-                  <td><input type="text" value="{{ duration }}" class="form-control"> </td>
-              {% endfor %}
-          </tr>
+      <tr>
+        <td class="day-date" data-date="{{ day_info[0] }}"></td>
+
+        {% for info in day_info[1] %}
+        <td>
+          <div class="input-group">
+            {% if info[1] %}
+            <input type="text" class="form-control plan-input" value="{{ info[1].description }}" data-id="{{ info[1].id }}">
+            {% else %}
+            <input type="text" class="form-control plan-input" data-date="{{ day_info[0] }}"
+              data-type-id="{{ info[0] }}" data-id="">
+            {% endif %}
+          </div>
+        </td>
+        {% endfor %}
+      </tr>
       {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    </tbody>
+  </table>
+</div>
 {% endblock %}
 
-  
+
 {% block code %}
 <script>
   document.querySelectorAll('.day-date').forEach(el => {
-    el.innerText = moment(new Date(el.getAttribute('day-date'))).locale('fa').format('YYYY/MM/DD')
+    el.innerText = moment(new Date(el.getAttribute('data-date'))).locale('fa').format('YYYY/MM/DD')
   })
+
+  const updatePlan = (event) => {
+    const el = event.srcElement;
+    const id = el.getAttribute('data-id')
+
+    if (id) {
+      let formData = new FormData();  
+      formData.append('description', el.value);
+      formData.append('id', id);
+
+      fetch("{{ url_for('dashboard.update_plan') }}", {
+        body: formData,
+        method: "post"
+      }).then(res => res.json()).then(res => console.log(res))
+    } else {
+      let formData = new FormData();  
+      formData.append('description', el.value);
+      formData.append('date', el.getAttribute('data-date'));
+      formData.append('type_id', el.getAttribute('data-type-id'));
+
+      fetch("{{ url_for('dashboard.add_plan') }}", {
+        body: formData,
+        method: "post"
+      }).then(res => res.json()).then(res => {
+        if(res.ok) {
+          el.setAttribute('data-id', res.id)
+        }
+      })
+    }
+
+  }
+  document.querySelectorAll('.plan-input').forEach(el => el.addEventListener('change', updatePlan))
+
 </script>
 {% endblock %}

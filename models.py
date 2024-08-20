@@ -94,7 +94,6 @@ class PlanType(db.Model):
 class Plan(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     date: Mapped[datetime.date] = mapped_column()
-    duration: Mapped[datetime.timedelta] = mapped_column()
     description: Mapped[str] = mapped_column()
     type_id: Mapped[int] = mapped_column(db.ForeignKey(PlanType.id))
 

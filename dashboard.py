@@ -65,7 +65,7 @@ def add_schedule():
     db.session.add(schedule)
     db.session.commit()
     
-    return {'id': schedule.id}
+    return {'ok': True, 'id': schedule.id}
 
 @dashboard.route('/dashboard/edit_schedule/update', methods=['POST'])
 @login_required
@@ -292,38 +292,9 @@ def import_ics():
     
     return {'ok': True}
 
-import logging
-logging.basicConfig()
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
-
-from sqlalchemy.orm import joinedload
-from random import randint
-
 @dashboard.route('/dashboard/weekly_plans', methods=['GET'])
 @login_required
 def weekly_plans():
-    now = datetime.datetime.now()
-
-    last_saturday = now - datetime.timedelta(days=(now.weekday() + 2) % 7 + 1)
-    last_saturday = last_saturday.replace(hour=0, minute=0, second=0, microsecond=0)
-
-    next_friday = last_saturday + datetime.timedelta(days=6)
-    next_friday = next_friday.replace(hour=23, minute=59, second=59)
-
-    week_plans = db.session.query(Plan) \
-            .options(joinedload(Plan.type)) \
-            .filter(Plan.date >= last_saturday) \
-            .filter(Plan.date <= next_friday) \
-            .filter_by(user_id=current_user.id).all()
-    
-    plan_types = db.session.query(PlanType) \
-            .filter_by(user_id=current_user.id).all()
-
-    # Step 1: Initialize the matrix (7 days x (1 + len(plan_types)))
-    num_plan_types = len(plan_types)
-    week_matrix = [[(last_saturday + datetime.timedelta(days=i)), [datetime.timedelta(0) for _ in range(num_plan_types)]] for i in range(7)]
-    
-    # Step 2: Map weekdays from Saturday to Friday (already accounted by initialization)
     weekday_order = {
         5: 0,  # Saturday -> 0
         6: 1,  # Sunday -> 1
@@ -334,13 +305,74 @@ def weekly_plans():
         4: 6,  # Friday -> 6
     }
     
-    # Step 3: Populate the matrix
+    now = datetime.datetime.now()
+
+    last_saturday = now - datetime.timedelta(days=weekday_order[now.weekday()])
+    last_saturday = last_saturday.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    next_friday = last_saturday + datetime.timedelta(days=6)
+    next_friday = next_friday.replace(hour=23, minute=59, second=59)
+
+    week_plans = db.session.query(Plan) \
+            .filter(Plan.date >= last_saturday) \
+            .filter(Plan.date <= next_friday) \
+            .filter_by(user_id=current_user.id).all()
+    
+    plan_types = db.session.query(PlanType) \
+            .filter_by(user_id=current_user.id).all()
+
     type_id_to_index = {ptype.id: index for index, ptype in enumerate(plan_types)}
+    index_to_type_id = {index: ptype.id for index, ptype in enumerate(plan_types)}
+
+    num_plan_types = len(plan_types)
+    week_matrix = [
+        [
+            (last_saturday + datetime.timedelta(days=i)).strftime('%Y/%m/%d'),
+            [[index_to_type_id[plan_type], None] for plan_type in range(num_plan_types)],
+        ]
+        for i in range(7)
+    ]
 
     for plan in week_plans:
         day_of_week = plan.date.weekday()
         day_index = weekday_order[day_of_week]
         type_index = type_id_to_index[plan.type_id]
-        week_matrix[day_index][1][type_index] += plan.duration
+        week_matrix[day_index][1][type_index][1] = plan
 
     return render_template('dashboard/weekly_plans.html.jinja', week_matrix=week_matrix, plan_types=plan_types)
+
+
+
+@dashboard.route('/dashboard/edit_plan/update', methods=['POST'])
+@login_required
+def update_plan():
+    id = int(request.form.get('id'))
+    description = request.form.get('description')
+
+    db.session.query(Plan).filter_by(user_id=current_user.id, id=id).update({
+        'description': description,
+    })
+
+    db.session.commit()
+    
+    return { 'ok': True }
+
+
+@dashboard.route('/dashboard/edit_plan/add', methods=['POST'])
+@login_required
+def add_plan():
+    description = request.form.get('description')
+    date = datetime.datetime.strptime(request.form.get('date'), '%Y/%m/%d')
+    type_id = int(request.form.get('type_id'))
+    
+    plan = Plan(
+        description=description,
+        date=date,
+        type_id=type_id,
+        user_id=current_user.id
+    )
+    
+    db.session.add(plan)
+    db.session.commit()
+    
+    return {'ok': True, 'id': plan.id}
