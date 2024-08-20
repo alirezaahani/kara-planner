@@ -15,13 +15,16 @@ def get_schedules():
     last_month = first - datetime.timedelta(days=1)
     next_month = first + datetime.timedelta(days=32)
 
-    query = db.session.query(Schedule) \
+    schedules = db.session.query(Schedule) \
             .filter(Schedule.start.between(last_month, next_month)) \
             .filter(Schedule.end.between(last_month, next_month)) \
             .filter_by(user_id=current_user.id) \
             .order_by(Schedule.start).all()
+    
+    schedule_types = db.session.query(ScheduleType) \
+            .filter_by(user_id=current_user.id).all()
 
-    return json.dumps(query, cls=DataClassEncoder)
+    return json.dumps({ 'schedules': schedules, 'schedule_types': schedule_types }, cls=DataClassEncoder)
 
 @dashboard.route('/dashboard', methods=['GET'])
 @login_required

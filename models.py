@@ -43,10 +43,10 @@ class Schedule(db.Model):
     start: Mapped[datetime.datetime] = mapped_column()
     end: Mapped[datetime.datetime] = mapped_column()
     description: Mapped[str] = mapped_column()
-    type: Mapped[ScheduleType] = db.relationship(ScheduleType)
     type_id: Mapped[int] = mapped_column(db.ForeignKey(ScheduleType.id))
     
     user_id = mapped_column(db.ForeignKey(User.id))
+    type = db.relationship(ScheduleType)
     user = db.relationship(User)
 
 
@@ -74,10 +74,10 @@ class ExamResult(db.Model):
     date: Mapped[datetime.datetime] = mapped_column()
     value: Mapped[float] = mapped_column()
     description: Mapped[str] = mapped_column()
-    type: Mapped[ExamType] = db.relationship(ExamType)
     type_id: Mapped[int] = mapped_column(db.ForeignKey(ExamType.id))
 
     user_id = mapped_column(db.ForeignKey(User.id))
+    type = db.relationship(ExamType)
     user = db.relationship(User)
 
 @dataclass

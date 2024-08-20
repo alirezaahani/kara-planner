@@ -49,14 +49,13 @@
 
 <script>
   fetch("{{ url_for("dashboard.get_schedules") }}").then(res => res.json()).then(server_data => { 
-
-    server_data = server_data.map((entry) => {
+    server_data = server_data['schedules'].map((entry) => {
       return {
         start: new Date(entry['start'] * 1000),
         end: new Date(entry['end'] * 1000),
         title: entry['description'],
         id: entry['id'],
-        className: 'item-' + entry['type']['id'],
+        className: 'item-' + entry['type_id'],
       }
     })
 
