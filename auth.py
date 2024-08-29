@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from captcha import captcha_handle
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import User, db, ScheduleType, ExamType, PlanType
 from flask_login import login_required, logout_user, login_user, current_user
@@ -27,10 +26,9 @@ def register_show():
     if current_user.is_authenticated:
         return redirect(url_for('dashboard.main'))
 
-    captcha = captcha_handle.create(length=5)
-    return render_template('auth/register.html.jinja', captcha=captcha)
+    return render_template('auth/register.html.jinja')
 
-REGISTER_FIELDS = {'username', 'password', 'passwordRep', 'name', 'captcha-hash', 'captcha-text'}
+REGISTER_FIELDS = {'username', 'password', 'passwordRep', 'name'}
 
 @auth.route("/register", methods=['POST'])
 def register_process():
@@ -42,9 +40,6 @@ def register_process():
     c_hash = request.form.get('captcha-hash')
     c_text = request.form.get('captcha-text')
     
-    if not captcha_handle.verify(c_text, c_hash):
-        flash('کد امنیتی به درستی وارد نشده است', 'danger')
-        return redirect(url_for('auth.register_show')) 
     if request.form.get('password') != request.form.get('passwordRep'):
         flash('رمز عبور به درستی تکرار نشده است.', 'danger')
         return redirect(url_for('auth.register_show')) 

@@ -371,3 +371,67 @@ def add_plan():
     db.session.commit()
     
     return {'ok': True, 'id': plan.id}
+
+@dashboard.route('/dashboard/types', methods=['GET'])
+@login_required
+def types():
+
+    schedule_types = db.session.query(ScheduleType) \
+            .filter_by(user_id=current_user.id).all()
+        
+    exam_types = db.session.query(ExamType) \
+        .filter_by(user_id=current_user.id).all()
+    
+    plan_types = db.session.query(PlanType) \
+            .filter_by(user_id=current_user.id).all()
+    
+    return render_template('dashboard/types.html.jinja', schedule_types=schedule_types, exam_types=exam_types, plan_types=plan_types)
+
+
+@dashboard.route('/dashboard/edit_schedule_type/update', methods=['POST'])
+@login_required
+def update_schedule_type():
+    id = int(request.form.get('id'))
+    description = request.form.get('description')
+    background_color_hex = request.form.get('background_color_hex')
+    text_color_hex = request.form.get('text_color_hex')
+
+    db.session.query(ScheduleType).filter_by(user_id=current_user.id, id=id).update({
+        'description': description,
+        'background_color_hex': background_color_hex,
+        'text_color_hex': text_color_hex,
+    })
+
+    db.session.commit()
+    
+    return { 'ok': True }
+
+
+@dashboard.route('/dashboard/edit_schedule_type/delete', methods=['POST'])
+@login_required
+def delete_schedule_type():
+    id = int(request.form.get('id'))
+
+    db.session.query(ScheduleType).filter_by(user_id=current_user.id, id=id).delete()
+    db.session.commit()
+    
+    return { 'ok': True }
+
+@dashboard.route('/dashboard/edit_schedule_type/add', methods=['POST'])
+@login_required
+def add_schedule_type():
+    description = request.form.get('description')
+    background_color_hex = request.form.get('background_color_hex')
+    text_color_hex = request.form.get('text_color_hex')
+
+    schedule_type = ScheduleType(
+        description=description,
+        background_color_hex=background_color_hex,
+        text_color_hex=text_color_hex,
+        user_id=current_user.id
+    )
+    
+    db.session.add(schedule_type)
+    db.session.commit()
+    
+    return {'ok': True, 'id': schedule_type.id}

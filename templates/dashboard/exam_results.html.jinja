@@ -26,7 +26,7 @@
       <form action="{{ url_for('dashboard.add_exam_result') }}" method="POST">
         <div class="modal-body">
           <div class="input-group mb-3">
-            <label for="result-type" class="input-group-text col-form-label">نوع آزمون</label>
+            <label for="result-type" class="input-group-text col-form-label">دسته بندی آزمون</label>
             <select class="form-select" id="result-type" name="result-type" required>
               {% for exam_type in exam_types %}
               <option value="{{ exam_type.id }}">{{ exam_type.description }}</option>

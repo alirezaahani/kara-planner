@@ -51,8 +51,8 @@
             <input type="text" class="form-control" id="description">
           </div>
           <div class="input-group mb-3">
-            <label for="schedule-type" class="input-group-text col-form-label">رنگ بندی برنامه ریزی</label>
-            <select class="form-select" aria-label="رنگ بندی برنامه ریزی" id="schedule-type">
+            <label for="schedule-type" class="input-group-text col-form-label">دسته بندی</label>
+            <select class="form-select" aria-label="دسته بندی" id="schedule-type">
               {% for schedule_type in schedule_types %}
               <option value="{{ schedule_type.id }}">{{ schedule_type.description }}</option>
               {% endfor %}

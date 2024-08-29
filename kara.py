@@ -2,7 +2,6 @@ from flask import Flask
 from index import index, support
 from auth import auth
 from dashboard import dashboard
-from captcha import captcha_handle
 from flask_login import LoginManager
 from flask import Flask
 from models import db, User
@@ -28,7 +27,6 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
-app = captcha_handle.init_app(app)
 app.register_blueprint(index)
 app.register_blueprint(auth)
 app.register_blueprint(support)

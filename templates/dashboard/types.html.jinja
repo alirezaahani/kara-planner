@@ -1,0 +1,205 @@
+{% extends 'dashboard/common.html.jinja' %}
+{% set active_page = 'types' %}
+
+
+{% block title %}ویرایش دسته بندی ها{% endblock %}
+{% block header %}ویرایش دسته بندی ها{% endblock %}
+
+{% block toolbar %}
+{% endblock %}
+
+{% block content %}
+<div class="accordion" id="accordionCategories">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="planningCategory">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapsePlanning" aria-expanded="true" aria-controls="collapsePlanning">
+                دسته بندی برنامه ریزی
+            </button>
+        </h2>
+
+        <div id="collapsePlanning" class="accordion-collapse collapse" aria-labelledby="planningCategory"
+            data-bs-parent="#accordionCategories">
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">نام و توضیحات</th>
+                                <th scope="col">رنگ پس زمینه</th>
+                                <th scope="col">رنگ متن</th>
+                                <th scope="col">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="scheduleFirst">
+                                <td><input type="text" class="form-control"></td>
+                                <td><input type="color" class="form-control form-control-color"></td>
+                                <td><input type="color" class="form-control form-control-color"></td>
+                                <td>
+                                    <div class="btn-toolbar mb-2 mb-md-0">
+                                        <div class="btn-group me-2">
+                                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                                onclick="addScheduleType">افزودن</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% for type in schedule_types %}
+                            <tr id="schedule-row-{{ type.id }}">
+                                <td><input type="text" class="form-control" value="{{ type.description }}"
+                                        id="schedule-description-{{ type.id }}" onchange="updateScheduleType"
+                                        data-id="{{ type.id }}"></td>
+                                <td><input type="color" class="form-control form-control-color"
+                                        value="{{ type.background_color_hex }}" id="schedule-background-{{ type.id }}"
+                                        onchange="updateScheduleType" data-id="{{ type.id }}"></td>
+                                <td><input type="color" class="form-control form-control-color"
+                                        value="{{ type.text_color_hex }}" id="schedule-text-{{ type.id }}"
+                                        onchange="updateScheduleType" data-id="{{ type.id }}"></td>
+                                <td>
+                                    <div class="btn-toolbar mb-2 mb-md-0">
+                                        <div class="btn-group me-2">
+                                            <button type="button" class="btn btn-sm btn-outline-danger" class="deleteScheduleType" data-id="{{ type.id }}">حذف</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="examsCategory">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapseExams" aria-expanded="false" aria-controls="collapseExams">
+                دسته بندی آزمون ها
+            </button>
+        </h2>
+        <div id="collapseExams" class="accordion-collapse collapse" aria-labelledby="examsCategory"
+            data-bs-parent="#accordionCategories">
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">نام و توضیحات</th>
+                                <th scope="col">رنگ</th>
+                                <th scope="col">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" class="form-control"></td>
+                                <td><input type="color" class="form-control form-control-color" title="رنگ"></td>
+                                <td>
+                                    <div class="btn-toolbar mb-2 mb-md-0">
+                                        <div class="btn-group me-2">
+                                            <button type="button" class="btn btn-sm btn-outline-primary">افزودن</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% for type in exam_types %}
+                            <tr>
+                                <td><input type="text" class="form-control" value="{{ type.description }}"></td>
+                                <td><input type="color" class="form-control form-control-color"
+                                        value="{{ type.color_hex }}" title="رنگ"></td>
+                                <td>
+                                    <div class="btn-toolbar mb-2 mb-md-0">
+                                        <div class="btn-group me-2">
+                                            <button type="button" class="btn btn-sm btn-outline-danger">حذف</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="weeklyScheduleCategory">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                data-bs-target="#collapseWeeklySchedule" aria-expanded="false" aria-controls="collapseWeeklySchedule">
+                دسته بندی برنامه هفتگی
+            </button>
+        </h2>
+        <div id="collapseWeeklySchedule" class="accordion-collapse collapse" aria-labelledby="weeklyScheduleCategory"
+            data-bs-parent="#accordionCategories">
+            <div class="accordion-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">نام و توضیحات</th>
+                                <th scope="col">رنگ پس زمینه</th>
+                                <th scope="col">رنگ متن</th>
+                                <th scope="col">عملیات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" class="form-control"></td>
+                                <td><input type="color" class="form-control form-control-color" title="رنگ پس زمینه">
+                                </td>
+                                <td><input type="color" class="form-control form-control-color" title="رنگ متن"></td>
+                                <td>
+                                    <div class="btn-toolbar mb-2 mb-md-0">
+                                        <div class="btn-group me-2">
+                                            <button type="button" class="btn btn-sm btn-outline-primary">افزودن</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% for type in plan_types %}
+                            <tr>
+                                <td><input type="text" class="form-control" value="{{ type.description }}"></td>
+                                <td><input type="color" class="form-control form-control-color"
+                                        value="{{ type.background_color_hex }}" title="رنگ پس زمینه"></td>
+                                <td><input type="color" class="form-control form-control-color"
+                                        value="{{ type.text_color_hex }}" title="رنگ متن"></td>
+                                <td>
+                                    <div class="btn-toolbar mb-2 mb-md-0">
+                                        <div class="btn-group me-2">
+                                            <button type="button" class="btn btn-sm btn-outline-danger">حذف</button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block code %}
+<script>
+    const deleteScheduleType = (event) => {
+        console.log(event)
+        const id = event.srcElement.getAttribute('data-id')
+
+        let formData = new FormData();
+        formData.append('id', id);
+
+        fetch("{{ url_for('dashboard.delete_schedule_type') }}", {
+            body: formData,
+            method: "post"
+        }).then(res => res.json()).then(res => { 
+            document.getElementById('schedule-row-' + id).style.display = 'none';
+         })
+    }
+</script>
+{% endblock %}
