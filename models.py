@@ -8,17 +8,20 @@ db = SQLAlchemy()
 
 import dataclasses, json
 
+
 class DataClassEncoder(json.JSONEncoder):
-        def default(self, o):
-            if dataclasses.is_dataclass(o):
-                return dataclasses.asdict(o)
-            if isinstance(o, (datetime.datetime, datetime.timedelta, datetime.date)):
-                return o.timestamp()
-            if isinstance(o, enum.Enum):
-                return o.name
-            return super().default(o)
-        
+    def default(self, o):
+        if dataclasses.is_dataclass(o):
+            return dataclasses.asdict(o)
+        if isinstance(o, (datetime.datetime, datetime.timedelta, datetime.date)):
+            return o.timestamp()
+        if isinstance(o, enum.Enum):
+            return o.name
+        return super().default(o)
+
+
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 
 @dataclass
 class User(UserMixin, db.Model):
@@ -27,15 +30,17 @@ class User(UserMixin, db.Model):
     password: Mapped[str] = mapped_column()
     name: Mapped[str] = mapped_column()
 
+
 @dataclass
 class ScheduleType(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     description: Mapped[str] = mapped_column()
     background_color_hex: Mapped[str] = mapped_column()
     text_color_hex: Mapped[str] = mapped_column()
-    
+
     user_id = mapped_column(db.ForeignKey(User.id))
     user = db.relationship(User)
+
 
 @dataclass
 class Schedule(db.Model):
@@ -44,7 +49,7 @@ class Schedule(db.Model):
     end: Mapped[datetime.datetime] = mapped_column()
     description: Mapped[str] = mapped_column()
     type_id: Mapped[int] = mapped_column(db.ForeignKey(ScheduleType.id))
-    
+
     user_id = mapped_column(db.ForeignKey(User.id))
     type = db.relationship(ScheduleType)
     user = db.relationship(User)
@@ -59,14 +64,16 @@ class Goal(db.Model):
     user_id = mapped_column(db.ForeignKey(User.id))
     user = db.relationship(User)
 
+
 @dataclass
 class ExamType(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     description: Mapped[str] = mapped_column()
     color_hex: Mapped[str] = mapped_column()
     user_id: Mapped[int] = mapped_column(db.ForeignKey(User.id))
-    
+
     user = db.relationship(User)
+
 
 @dataclass
 class ExamResult(db.Model):
@@ -80,6 +87,7 @@ class ExamResult(db.Model):
     type = db.relationship(ExamType)
     user = db.relationship(User)
 
+
 @dataclass
 class PlanType(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -89,6 +97,7 @@ class PlanType(db.Model):
     user_id: Mapped[int] = mapped_column(db.ForeignKey(User.id))
 
     user = db.relationship(User)
+
 
 @dataclass
 class Plan(db.Model):

@@ -1,16 +1,17 @@
 from flask import Blueprint, render_template
 
 
-index = Blueprint('index', __name__)
+index = Blueprint("index", __name__)
 
-@index.route('/', methods=['GET'])
+
+@index.route("/", methods=["GET"])
 def show():
-    return render_template('index.html.jinja')
+    return render_template("index.html.jinja")
 
 
+support = Blueprint("support", __name__)
 
-support = Blueprint('support', __name__)
 
-@support.route('/support', methods=['GET'])
+@support.route("/support", methods=["GET"])
 def show():
-    return render_template('index.html.jinja')
+    return render_template("index.html.jinja")

@@ -16,13 +16,15 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "auth.login_show"
 login_manager.login_message = "لطفا ابتدا وارد شوید."
-login_manager.login_message_category = 'danger'
+login_manager.login_message_category = "danger"
 login_manager.needs_refresh_message = "لطفا دوباره وارد شوید."
-login_manager.needs_refresh_message_category = 'danger'
+login_manager.needs_refresh_message_category = "danger"
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
 
 with app.app_context():
     db.create_all()
@@ -33,5 +35,6 @@ app.register_blueprint(support)
 app.register_blueprint(dashboard)
 
 import logging
+
 logging.basicConfig()
-logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
