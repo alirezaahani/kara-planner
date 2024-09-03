@@ -94,121 +94,126 @@
 
 
 <script>
-  let server_data = {{ data| safe }}
+  let server_data = {{ data| safe }};
+function generateHTMLAndCreateCharts(data) {
+  let html = '';
 
-  function generateHTMLAndCreateCharts(data) {
-    let html = '';
+  for (const [key, results] of Object.entries(data)) {
+    // We expect results to be an array with one object based on the example
+    const resultGroup = results[0];
+    const examType = resultGroup.type;
 
-    for (const [key, results] of Object.entries(data)) {
-      html += `
-      <div class="row">
-        <div class="col">
-          <canvas class="chart" id="exam-${key}-chart"></canvas>
-        </div>
-        <div class="col">
-          <div class="table-responsive">
-            <table class="table table-striped table-sm">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">تاریخ</th>
-                  <th scope="col">نوع</th>
-                  <th scope="col">نتیجه</th>
-                  <th scope="col">توضیحات</th>
-                  <th scope="col">عملیات</th>
-                </tr>
-              </thead>
-              <tbody>
+    html += `
+    <div class="row">
+      <div class="col">
+        <canvas class="chart" id="exam-${key}-chart"></canvas>
+      </div>
+      <div class="col">
+        <div class="table-responsive">
+          <table class="table table-striped table-sm">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">تاریخ</th>
+                <th scope="col">نوع</th>
+                <th scope="col">نتیجه</th>
+                <th scope="col">توضیحات</th>
+                <th scope="col">عملیات</th>
+              </tr>
+            </thead>
+            <tbody>
     `;
 
-      results[0].result.forEach(result => {
-        const date = new Date(result.date * 1000);
-        const formattedDate = moment(date).locale('fa').format('YYYY/MM/DD');
-
-        html += `
-                <tr>
-                  <td>${result.id}</td>
-                  <td>${formattedDate}</td>
-                  <td>${result.type.description}</td>
-                  <td>${result.value}</td>
-                  <td>${result.description}</td>
-                  <td>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                      <div class="btn-group me-2">
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="remove(${result.id});">حذف</button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-      `;
-      });
+    resultGroup.result.forEach(result => {
+      const date = new Date(result.date * 1000);
+      const formattedDate = moment(date).locale('fa').format('YYYY/MM/DD');
 
       html += `
-              </tbody>
-            </table>
-          </div>
+            <tr>
+              <td>${result.id}</td>
+              <td>${formattedDate}</td>
+              <td>${examType.description}</td>
+              <td>${result.value}</td>
+              <td>${result.description}</td>
+              <td>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                  <div class="btn-group me-2">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="remove(${result.id});">حذف</button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+      `;
+    });
+
+    html += `
+            </tbody>
+          </table>
         </div>
       </div>
+    </div>
     `;
-    }
+  }
 
-    // Insert the generated HTML
-    document.getElementById('results-container').innerHTML = html;
+  // Insert the generated HTML
+  document.getElementById('results-container').innerHTML = html;
 
-    // Create charts
-    for (const [key, results] of Object.entries(data)) {
-      const ctx = document.getElementById(`exam-${key}-chart`).getContext('2d');
+  // Create charts
+  for (const [key, results] of Object.entries(data)) {
+    const ctx = document.getElementById(`exam-${key}-chart`).getContext('2d');
 
-      const chartData = results[0].result.map(result => ({
-        x: moment(new Date(result.date * 1000)).locale('fa').format('YYYY/MM/DD'), // Format date as 'YYYY-MM-DD'
-        y: result.value
-      }));
+    const resultGroup = results[0];
+    const chartData = resultGroup.result.map(result => ({
+      x: moment(new Date(result.date * 1000)).locale('fa').format('YYYY/MM/DD'),
+      y: result.value
+    }));
 
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          datasets: [{
-            label: results[0].type.description,
-            data: chartData,
-            backgroundColor: results[0].type.color_hex,
-            borderColor: results[0].type.color_hex,
-            tension: 0.1
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              type: 'category',
-              title: {
-                display: true,
-                text: 'تاریخ'
-              }
-            },
-            y: {
-              beginAtZero: true,
-              title: {
-                display: true,
-                text: 'نتیجه'
-              }
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: resultGroup.type.description,
+          data: chartData,
+          backgroundColor: resultGroup.type.color_hex,
+          borderColor: resultGroup.type.color_hex,
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            type: 'category',
+            title: {
+              display: true,
+              text: 'تاریخ'
             }
           },
-          plugins: {
-            tooltip: {
-              callbacks: {
-                label: function (context) {
-                  const value = context.parsed.y;
-                  return `مقدار: ${value}`;
-                }
+          y: {
+            beginAtZero: true,
+            title: {
+              display: true,
+              text: 'نتیجه'
+            }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                const value = context.parsed.y;
+                return `مقدار: ${value}`;
               }
             }
           }
         }
-      });
-    }
+      }
+    });
   }
+}
 
-  // Call the function to generate HTML and create charts
-  generateHTMLAndCreateCharts(server_data);
+// Call the function to generate HTML and create charts
+generateHTMLAndCreateCharts(server_data);
+
 </script>
 {% endblock %}

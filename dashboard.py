@@ -456,14 +456,14 @@ def types():
     exam_types = (
         db.session.query(ExamType)
         .filter_by(user_id=current_user.id)
-        .filter(ScheduleType.description != "unknown")
+        .filter(ExamType.description != "unknown")
         .all()
     )
 
     plan_types = (
         db.session.query(PlanType)
         .filter_by(user_id=current_user.id)
-        .filter(ScheduleType.description != "unknown")
+        .filter(PlanType.description != "unknown")
         .all()
     )
 
