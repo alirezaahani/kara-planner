@@ -83,44 +83,8 @@ def register_process():
         schedule_types = [
             ScheduleType(
                 description="unknown",
-                background_color_hex="#222",
-                text_color_hex="#fff",
-                user_id=user.id,
-            ),
-            ScheduleType(
-                description="sleep",
-                background_color_hex="#666DCB",
-                text_color_hex="#fff",
-                user_id=user.id,
-            ),
-            ScheduleType(
-                description="study",
-                background_color_hex="#3ABBC9",
-                text_color_hex="#222",
-                user_id=user.id,
-            ),
-            ScheduleType(
-                description="work",
-                background_color_hex="#9BCA3E",
-                text_color_hex="#222",
-                user_id=user.id,
-            ),
-            ScheduleType(
-                description="break",
-                background_color_hex="#FEEB51",
-                text_color_hex="#fff",
-                user_id=user.id,
-            ),
-            ScheduleType(
-                description="exercise",
-                background_color_hex="#FF8C00",
-                text_color_hex="#222",
-                user_id=user.id,
-            ),
-            ScheduleType(
-                description="other",
-                background_color_hex="#D2042D",
-                text_color_hex="#fff",
+                background_color_hex="#222222",
+                text_color_hex="#ffffff",
                 user_id=user.id,
             ),
         ]
@@ -128,49 +92,14 @@ def register_process():
         plan_types = [
             PlanType(
                 description="unknown",
-                background_color_hex="#222",
-                text_color_hex="#fff",
-                user_id=user.id,
-            ),
-            PlanType(
-                description="sleep",
-                background_color_hex="#666DCB",
-                text_color_hex="#fff",
-                user_id=user.id,
-            ),
-            PlanType(
-                description="study",
-                background_color_hex="#3ABBC9",
-                text_color_hex="#222",
-                user_id=user.id,
-            ),
-            PlanType(
-                description="work",
-                background_color_hex="#9BCA3E",
-                text_color_hex="#222",
-                user_id=user.id,
-            ),
-            PlanType(
-                description="break",
-                background_color_hex="#FEEB51",
-                text_color_hex="#fff",
-                user_id=user.id,
-            ),
-            PlanType(
-                description="exercise",
-                background_color_hex="#FF8C00",
-                text_color_hex="#222",
-                user_id=user.id,
-            ),
-            PlanType(
-                description="other",
-                background_color_hex="#D2042D",
-                text_color_hex="#fff",
+                background_color_hex="#222222",
+                text_color_hex="#ffffff",
                 user_id=user.id,
             ),
         ]
 
         exam_types = [
+            ExamType(description="unknown", color_hex="#ffffff", user_id=user.id),
             ExamType(description="test", color_hex="#666DCB", user_id=user.id),
             ExamType(description="quiz", color_hex="#3ABBC9", user_id=user.id),
             ExamType(description="essay", color_hex="#9BCA3E", user_id=user.id),

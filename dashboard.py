@@ -447,12 +447,25 @@ def add_plan():
 @login_required
 def types():
     schedule_types = (
-        db.session.query(ScheduleType).filter_by(user_id=current_user.id).all()
+        db.session.query(ScheduleType)
+        .filter_by(user_id=current_user.id)
+        .filter(ScheduleType.description != "unknown")
+        .all()
     )
 
-    exam_types = db.session.query(ExamType).filter_by(user_id=current_user.id).all()
+    exam_types = (
+        db.session.query(ExamType)
+        .filter_by(user_id=current_user.id)
+        .filter(ScheduleType.description != "unknown")
+        .all()
+    )
 
-    plan_types = db.session.query(PlanType).filter_by(user_id=current_user.id).all()
+    plan_types = (
+        db.session.query(PlanType)
+        .filter_by(user_id=current_user.id)
+        .filter(ScheduleType.description != "unknown")
+        .all()
+    )
 
     return render_template(
         "dashboard/types.html.jinja",
@@ -488,6 +501,12 @@ def update_schedule_type():
 def delete_schedule_type():
     id = int(request.form.get("id"))
 
+    default_type = db.session.query(ScheduleType).filter_by(description="unknown").one()
+
+    db.session.query(Schedule).filter_by(type_id=id).update(
+        {"type_id": default_type.id}
+    )
+
     db.session.query(ScheduleType).filter_by(user_id=current_user.id, id=id).delete()
     db.session.commit()
 
@@ -512,3 +531,113 @@ def add_schedule_type():
     db.session.commit()
 
     return {"ok": True, "id": schedule_type.id}
+
+
+@dashboard.route("/dashboard/edit_plan_type/update", methods=["POST"])
+@login_required
+def update_plan_type():
+    id = int(request.form.get("id"))
+    description = request.form.get("description")
+    background_color_hex = request.form.get("background_color_hex")
+    text_color_hex = request.form.get("text_color_hex")
+
+    db.session.query(PlanType).filter_by(user_id=current_user.id, id=id).update(
+        {
+            "description": description,
+            "background_color_hex": background_color_hex,
+            "text_color_hex": text_color_hex,
+        }
+    )
+
+    db.session.commit()
+
+    return {"ok": True}
+
+
+@dashboard.route("/dashboard/edit_plan_type/delete", methods=["POST"])
+@login_required
+def delete_plan_type():
+    id = int(request.form.get("id"))
+
+    default_type = db.session.query(PlanType).filter_by(description="unknown").one()
+
+    db.session.query(Plan).filter_by(type_id=id).update({"type_id": default_type.id})
+
+    db.session.query(PlanType).filter_by(user_id=current_user.id, id=id).delete()
+    db.session.commit()
+
+    return {"ok": True}
+
+
+@dashboard.route("/dashboard/edit_plan_type/add", methods=["POST"])
+@login_required
+def add_plan_type():
+    description = request.form.get("description")
+    background_color_hex = request.form.get("background_color_hex")
+    text_color_hex = request.form.get("text_color_hex")
+
+    plan_type = PlanType(
+        description=description,
+        background_color_hex=background_color_hex,
+        text_color_hex=text_color_hex,
+        user_id=current_user.id,
+    )
+
+    db.session.add(plan_type)
+    db.session.commit()
+
+    return {"ok": True, "id": plan_type.id}
+
+
+@dashboard.route("/dashboard/edit_exam_type/update", methods=["POST"])
+@login_required
+def update_exam_type():
+    id = int(request.form.get("id"))
+    description = request.form.get("description")
+    color_hex = request.form.get("color_hex")
+
+    db.session.query(ExamType).filter_by(user_id=current_user.id, id=id).update(
+        {
+            "description": description,
+            "color_hex": color_hex,
+        }
+    )
+
+    db.session.commit()
+
+    return {"ok": True}
+
+
+@dashboard.route("/dashboard/edit_exam_type/delete", methods=["POST"])
+@login_required
+def delete_exam_type():
+    id = int(request.form.get("id"))
+
+    default_type = db.session.query(ExamType).filter_by(description="unknown").one()
+
+    db.session.query(ExamResult).filter_by(type_id=id).update(
+        {"type_id": default_type.id}
+    )
+
+    db.session.query(ExamType).filter_by(user_id=current_user.id, id=id).delete()
+    db.session.commit()
+
+    return {"ok": True}
+
+
+@dashboard.route("/dashboard/edit_exam_type/add", methods=["POST"])
+@login_required
+def add_exam_type():
+    description = request.form.get("description")
+    color_hex = request.form.get("color_hex")
+
+    exam_type = ExamType(
+        description=description,
+        color_hex=color_hex,
+        user_id=current_user.id,
+    )
+
+    db.session.add(exam_type)
+    db.session.commit()
+
+    return {"ok": True, "id": exam_type.id}

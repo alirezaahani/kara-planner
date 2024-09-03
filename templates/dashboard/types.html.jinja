@@ -40,7 +40,7 @@
                                     <div class="btn-toolbar mb-2 mb-md-0">
                                         <div class="btn-group me-2">
                                             <button type="button" class="btn btn-sm btn-outline-primary"
-                                                onclick="addScheduleType">افزودن</button>
+                                                onclick="addScheduleType()">افزودن</button>
                                         </div>
                                     </div>
                                 </td>
@@ -48,18 +48,18 @@
                             {% for type in schedule_types %}
                             <tr id="schedule-row-{{ type.id }}">
                                 <td><input type="text" class="form-control" value="{{ type.description }}"
-                                        id="schedule-description-{{ type.id }}" onchange="updateScheduleType"
+                                        id="schedule-description-{{ type.id }}" onchange="updateScheduleType(event)"
                                         data-id="{{ type.id }}"></td>
                                 <td><input type="color" class="form-control form-control-color"
                                         value="{{ type.background_color_hex }}" id="schedule-background-{{ type.id }}"
-                                        onchange="updateScheduleType" data-id="{{ type.id }}"></td>
+                                        onchange="updateScheduleType(event)" data-id="{{ type.id }}"></td>
                                 <td><input type="color" class="form-control form-control-color"
                                         value="{{ type.text_color_hex }}" id="schedule-text-{{ type.id }}"
-                                        onchange="updateScheduleType" data-id="{{ type.id }}"></td>
+                                        onchange="updateScheduleType(event)" data-id="{{ type.id }}"></td>
                                 <td>
                                     <div class="btn-toolbar mb-2 mb-md-0">
                                         <div class="btn-group me-2">
-                                            <button type="button" class="btn btn-sm btn-outline-danger" class="deleteScheduleType" data-id="{{ type.id }}">حذف</button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" class="deleteScheduleType" data-id="{{ type.id }}" onclick="deleteScheduleType(event)">حذف</button>
                                         </div>
                                     </div>
                                 </td>
@@ -98,20 +98,20 @@
                                 <td>
                                     <div class="btn-toolbar mb-2 mb-md-0">
                                         <div class="btn-group me-2">
-                                            <button type="button" class="btn btn-sm btn-outline-primary">افزودن</button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addExamType()">افزودن</button>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
                             {% for type in exam_types %}
-                            <tr>
-                                <td><input type="text" class="form-control" value="{{ type.description }}"></td>
+                            <tr id="exam-row-{{ type.id }}">
+                                <td><input type="text" class="form-control" id="exam-description-{{ type.id }}" value="{{ type.description }}" data-id="{{ type.id }}" onchange="updateExamType(event)"></td>
                                 <td><input type="color" class="form-control form-control-color"
-                                        value="{{ type.color_hex }}" title="رنگ"></td>
+                                        value="{{ type.color_hex }}" title="رنگ" id="exam-color-{{ type.id }}" data-id="{{ type.id }}" onchange="updateExamType(event)"></td>
                                 <td>
                                     <div class="btn-toolbar mb-2 mb-md-0">
                                         <div class="btn-group me-2">
-                                            <button type="button" class="btn btn-sm btn-outline-danger">حذف</button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-id="{{ type.id }}" onclick="deleteExamType(event)">حذف</button>
                                         </div>
                                     </div>
                                 </td>
@@ -154,22 +154,22 @@
                                 <td>
                                     <div class="btn-toolbar mb-2 mb-md-0">
                                         <div class="btn-group me-2">
-                                            <button type="button" class="btn btn-sm btn-outline-primary">افزودن</button>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addPlanType()">افزودن</button>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
                             {% for type in plan_types %}
-                            <tr>
-                                <td><input type="text" class="form-control" value="{{ type.description }}"></td>
-                                <td><input type="color" class="form-control form-control-color"
-                                        value="{{ type.background_color_hex }}" title="رنگ پس زمینه"></td>
-                                <td><input type="color" class="form-control form-control-color"
-                                        value="{{ type.text_color_hex }}" title="رنگ متن"></td>
+                            <tr id="plan-row-{{ type.id }}">
+                                <td><input type="text" class="form-control" value="{{ type.description }}" id="plan-description-{{ type.id }}" data-id="{{ type.id }}" onchange="updatePlanType(event)"></td>
+                                <td><input type="color" class="form-control form-control-color" id="plan-background-{{ type.id }}"
+                                        value="{{ type.background_color_hex }}" title="رنگ پس زمینه" data-id="{{ type.id }}" onchange="updatePlanType(event)"></td>
+                                <td><input type="color" class="form-control form-control-color" id="plan-text-{{ type.id }}"
+                                        value="{{ type.text_color_hex }}" title="رنگ متن" data-id="{{ type.id }}" onchange="updatePlanType(event)"></td>
                                 <td>
                                     <div class="btn-toolbar mb-2 mb-md-0">
                                         <div class="btn-group me-2">
-                                            <button type="button" class="btn btn-sm btn-outline-danger">حذف</button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-id="{{ type.id }}" onclick="deletePlanType(event)">حذف</button>
                                         </div>
                                     </div>
                                 </td>
@@ -188,7 +188,6 @@
 {% block code %}
 <script>
     const deleteScheduleType = (event) => {
-        console.log(event)
         const id = event.srcElement.getAttribute('data-id')
 
         let formData = new FormData();
@@ -200,6 +199,144 @@
         }).then(res => res.json()).then(res => { 
             document.getElementById('schedule-row-' + id).style.display = 'none';
          })
+    }
+    const addScheduleType = () => {
+        const description = document.querySelector('#scheduleFirst input[type="text"]').value;
+        const backgroundColor = document.querySelector('#scheduleFirst input[type="color"]').value;
+        const textColor = document.querySelectorAll('#scheduleFirst input[type="color"]')[1].value;
+
+        let formData = new FormData();
+        formData.append('description', description);
+        formData.append('background_color_hex', backgroundColor);
+        formData.append('text_color_hex', textColor);
+
+        fetch("{{ url_for('dashboard.add_schedule_type') }}", {
+            body: formData,
+            method: "post"
+        }).then(res => res.json()).then(res => {
+            if (res.ok) {
+                location.reload();  // Reload the page to see the new type
+            }
+        });
+    }
+    const updateScheduleType = (event) => {
+        const id = event.target.getAttribute('data-id');
+        const description = document.getElementById(`schedule-description-${id}`).value;
+        const backgroundColor = document.getElementById(`schedule-background-${id}`).value;
+        const textColor = document.getElementById(`schedule-text-${id}`).value;
+
+        let formData = new FormData();
+        formData.append('id', id);
+        formData.append('description', description);
+        formData.append('background_color_hex', backgroundColor);
+        formData.append('text_color_hex', textColor);
+
+        fetch("{{ url_for('dashboard.update_schedule_type') }}", {
+            body: formData,
+            method: "post"
+        }).then(res => res.json()).then(res => {
+        });
+    }
+
+    const deletePlanType = (event) => {
+        const id = event.target.getAttribute('data-id');
+
+        let formData = new FormData();
+        formData.append('id', id);
+
+        fetch("{{ url_for('dashboard.delete_plan_type') }}", {
+            body: formData,
+            method: "post"
+        }).then(res => res.json()).then(res => {
+            if (res.ok) {
+                document.getElementById('plan-row-' + id).style.display = 'none';
+            }
+        });
+    }
+    const addPlanType = () => {
+        const description = document.querySelector('#planFirst input[type="text"]').value;
+        const backgroundColor = document.querySelector('#planFirst input[type="color"]').value;
+        const textColor = document.querySelectorAll('#planFirst input[type="color"]')[1].value;
+
+        let formData = new FormData();
+        formData.append('description', description);
+        formData.append('background_color_hex', backgroundColor);
+        formData.append('text_color_hex', textColor);
+
+        fetch("{{ url_for('dashboard.add_plan_type') }}", {
+            body: formData,
+            method: "post"
+        }).then(res => res.json()).then(res => {
+            if (res.ok) {
+                location.reload();  // Reload the page to see the new type
+            }
+        });
+    }
+    const updatePlanType = (event) => {
+        const id = event.target.getAttribute('data-id');
+        const description = document.getElementById(`plan-description-${id}`).value;
+        const backgroundColor = document.getElementById(`plan-background-${id}`).value;
+        const textColor = document.getElementById(`plan-text-${id}`).value;
+
+        let formData = new FormData();
+        formData.append('id', id);
+        formData.append('description', description);
+        formData.append('background_color_hex', backgroundColor);
+        formData.append('text_color_hex', textColor);
+
+        fetch("{{ url_for('dashboard.update_plan_type') }}", {
+            body: formData,
+            method: "post"
+        }).then(res => res.json()).then(res => {
+        });
+    }
+    const deleteExamType = (event) => {
+        const id = event.target.getAttribute('data-id');
+
+        let formData = new FormData();
+        formData.append('id', id);
+
+        fetch("{{ url_for('dashboard.delete_exam_type') }}", {
+            body: formData,
+            method: "post"
+        }).then(res => res.json()).then(res => {
+            if (res.ok) {
+                document.getElementById('exam-row-' + id).style.display = 'none';
+            }
+        });
+    }
+    const addExamType = () => {
+        const description = document.querySelector('#examFirst input[type="text"]').value;
+        const colorHex = document.querySelector('#examFirst input[type="color"]').value;
+
+        let formData = new FormData();
+        formData.append('description', description);
+        formData.append('color_hex', colorHex);
+
+        fetch("{{ url_for('dashboard.add_exam_type') }}", {
+            body: formData,
+            method: "post"
+        }).then(res => res.json()).then(res => {
+            if (res.ok) {
+                location.reload();  // Reload the page to see the new type
+            }
+        });
+    }
+    const updateExamType = (event) => {
+        const id = event.target.getAttribute('data-id');
+        const description = document.getElementById(`exam-description-${id}`).value;
+        const colorHex = document.getElementById(`exam-color-${id}`).value;
+
+        let formData = new FormData();
+        formData.append('id', id);
+        formData.append('description', description);
+        formData.append('color_hex', colorHex);
+
+        fetch("{{ url_for('dashboard.update_exam_type') }}", {
+            body: formData,
+            method: "post"
+        }).then(res => res.json()).then(res => {
+        });
     }
 </script>
 {% endblock %}
