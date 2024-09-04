@@ -62,7 +62,7 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
           <button type="button" class="btn btn-danger" data-bs-dismiss="modal" id="delete">حذف برنامه</button>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="add">ذخیره ویرایش</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="add">تایید</button>
         </div>
       </form>
     </div>
@@ -112,7 +112,6 @@
         (new bootstrap.Modal('#scheduleModal', {})).show();
 
         const delete_btn = document.querySelector('#delete');
-
         delete_btn.disabled = true;
 
         document.querySelector('#add').addEventListener('click', (e) => {
@@ -193,6 +192,9 @@
         type.value = info.event['classNames'][0].replace("item-", "").toUpperCase();
 
         (new bootstrap.Modal('#scheduleModal', {})).show();
+        
+        const delete_btn = document.querySelector('#delete');
+        delete_btn.disabled = false;
 
         document.querySelector('#add').addEventListener('click', (event) => {
           const name = document.querySelector('#description');
