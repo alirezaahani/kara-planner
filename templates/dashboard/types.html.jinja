@@ -215,7 +215,20 @@
             method: "post"
         }).then(res => res.json()).then(res => {
             if (res.ok) {
-                location.reload();  // Reload the page to see the new type
+                const newRow = document.createElement('tr');
+                newRow.id = 'schedule-row-' + res.id;
+                newRow.innerHTML = `
+                    <td><input type="text" class="form-control" value="${description}" id="schedule-description-${res.id}" data-id="${res.id}" onchange="updateScheduleType(event)"></td>
+                    <td><input type="color" class="form-control form-control-color" value="${backgroundColor}" id="schedule-background-${res.id}" data-id="${res.id}" onchange="updateScheduleType(event)"></td>
+                    <td><input type="color" class="form-control form-control-color" value="${textColor}" id="schedule-text-${res.id}" data-id="${res.id}" onchange="updateScheduleType(event)"></td>
+                    <td>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <div class="btn-group me-2">
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-id="${res.id}" onclick="deleteScheduleType(event)">حذف</button>
+                            </div>
+                        </div>
+                    </td>`;
+                document.querySelector('#scheduleFirst').insertAdjacentElement('afterend', newRow);
             }
         });
     }
@@ -268,7 +281,20 @@
             method: "post"
         }).then(res => res.json()).then(res => {
             if (res.ok) {
-                location.reload();  // Reload the page to see the new type
+                const newRow = document.createElement('tr');
+                newRow.id = 'plan-row-' + res.id;
+                newRow.innerHTML = `
+                    <td><input type="text" class="form-control" value="${description}" id="plan-description-${res.id}" data-id="${res.id}" onchange="updatePlanType(event)"></td>
+                    <td><input type="color" class="form-control form-control-color" value="${backgroundColor}" id="plan-background-${res.id}" data-id="${res.id}" onchange="updatePlanType(event)"></td>
+                    <td><input type="color" class="form-control form-control-color" value="${textColor}" id="plan-text-${res.id}" data-id="${res.id}" onchange="updatePlanType(event)"></td>
+                    <td>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <div class="btn-group me-2">
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-id="${res.id}" onclick="deletePlanType(event)">حذف</button>
+                            </div>
+                        </div>
+                    </td>`;
+                document.querySelector('#planFirst').insertAdjacentElement('afterend', newRow);
             }
         });
     }
@@ -318,7 +344,19 @@
             method: "post"
         }).then(res => res.json()).then(res => {
             if (res.ok) {
-                location.reload();  // Reload the page to see the new type
+                const newRow = document.createElement('tr');
+                newRow.id = 'exam-row-' + res.id;
+                newRow.innerHTML = `
+                    <td><input type="text" class="form-control" value="${description}" id="exam-description-${res.id}" data-id="${res.id}" onchange="updateExamType(event)"></td>
+                    <td><input type="color" class="form-control form-control-color" value="${colorHex}" id="exam-color-${res.id}" data-id="${res.id}" onchange="updateExamType(event)"></td>
+                    <td>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <div class="btn-group me-2">
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-id="${res.id}" onclick="deleteExamType(event)">حذف</button>
+                            </div>
+                        </div>
+                    </td>`;
+                document.querySelector('#examFirst').insertAdjacentElement('afterend', newRow);
             }
         });
     }
