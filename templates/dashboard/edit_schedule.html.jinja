@@ -77,172 +77,159 @@
 <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/locales/fa.global.min.js"></script>
 
 <script>
-    fetch("{{ url_for("dashboard.get_schedules") }}").then(res => res.json()).then(server_data => { 
+  const calendarEl = document.getElementById('calendar');
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'timeGridDay',
+    locale: 'fa',
+    events: "{{ url_for("dashboard.get_schedules") }}",
+    slotDuration: '00:15:00',
+    themeSystem: 'bootstrap5',
+    nowIndicator: true,
+    editable: true,
+    eventResizableFromStart: true,
+    selectable: true,
+    allDaySlot: false,
 
-  server_data = server_data['schedules'].map((entry) => {
-    return {
-      start: new Date(entry['start'] * 1000),
-      end: new Date(entry['end'] * 1000),
-      title: entry['description'],
-      id: entry['id'],
-      className: 'item-' + entry['type_id'],
-    }
-  })
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
 
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: 'timeGridDay',
-      locale: 'fa',
-      events: server_data,
-      slotDuration: '00:15:00',
-      themeSystem: 'bootstrap5',
-      nowIndicator: true,
-      editable: true,
-      eventResizableFromStart: true,
-      selectable: true,
-      allDaySlot: false,
+    select: function (info) {
+      (new bootstrap.Modal('#scheduleModal', {})).show();
 
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-      },
+      const delete_btn = document.querySelector('#delete');
+      delete_btn.disabled = true;
 
-      select: function (info) {
-        (new bootstrap.Modal('#scheduleModal', {})).show();
-
-        const delete_btn = document.querySelector('#delete');
-        delete_btn.disabled = true;
-
-        document.querySelector('#add').addEventListener('click', (e) => {
-          const name = document.querySelector('#description');
-          const type = document.querySelector('#schedule-type');
-
-          if ((!name.value) || (!type.value)) {
-            delete_btn.disabled = false;
-            return
-          }
-
-          let event = {};
-
-          event['start'] = new Date(info['start'].getTime())
-          event['end'] = new Date(info['end'].getTime())
-          event['title'] = name.value;
-          event['classNames'] = ['item-' + type.value.toLowerCase()];
-
-          name.value = ''
-          
-
-          let formData = new FormData();
-          formData.append('start', event['start'].getTime());
-          formData.append('end', event['end'].getTime());
-          formData.append('description', event['title']);
-          formData.append('type', event['classNames'][0].replace("item-", "").toUpperCase());
-
-          const id = fetch("{{ url_for('dashboard.add_schedule') }}", {
-            body: formData,
-            method: "post"
-          })
-            .then(res => res.json())
-            .then(res => {
-              console.log(res['id'])
-              event['id'] = res['id']
-              
-              delete_btn.disabled = false;
-              calendar.addEvent(event)
-            })
-        }, { once: true })
-      },
-
-
-      eventResize: function (info) {
-        let formData = new FormData();
-
-        formData.append('id', info.event['id']);
-        formData.append('start', info.event['start'].getTime());
-        formData.append('end', info.event['end'].getTime());
-        formData.append('description', info.event['title']);
-        formData.append('type', info.event['classNames'][0].replace("item-", "").toUpperCase());
-
-        fetch("{{ url_for('dashboard.update_schedule') }}", {
-          body: formData,
-          method: "post"
-        })
-      },
-
-      eventDrop: function (info) {
-        let formData = new FormData();
-
-        formData.append('id', info.event['id']);
-        formData.append('start', info.event['start'].getTime());
-        formData.append('end', info.event['end'].getTime());
-        formData.append('description', info.event['title']);
-        formData.append('type', info.event['classNames'][0].replace("item-", "").toUpperCase());
-
-        fetch("{{ url_for('dashboard.update_schedule') }}", {
-          body: formData,
-          method: "post"
-        })
-      },
-
-      eventClick: function (info) {
+      document.querySelector('#add').addEventListener('click', (e) => {
         const name = document.querySelector('#description');
         const type = document.querySelector('#schedule-type');
-        name.value = info.event.title;
-        type.value = info.event['classNames'][0].replace("item-", "").toUpperCase();
 
-        (new bootstrap.Modal('#scheduleModal', {})).show();
+        if ((!name.value) || (!type.value)) {
+          delete_btn.disabled = false;
+          return
+        }
+
+        let event = {};
+
+        event['start'] = new Date(info['start'].getTime())
+        event['end'] = new Date(info['end'].getTime())
+        event['title'] = name.value;
+        event['classNames'] = ['item-' + type.value.toLowerCase()];
+
+        name.value = ''
         
-        const delete_btn = document.querySelector('#delete');
-        delete_btn.disabled = false;
 
-        document.querySelector('#add').addEventListener('click', (event) => {
-          const name = document.querySelector('#description');
-          const type = document.querySelector('#schedule-type');
+        let formData = new FormData();
+        formData.append('start', event['start'].getTime());
+        formData.append('end', event['end'].getTime());
+        formData.append('description', event['title']);
+        formData.append('type', event['classNames'][0].replace("item-", "").toUpperCase());
 
-          if ((!name.value) || (!type.value)) {
-            return
-          }
+        const id = fetch("{{ url_for('dashboard.add_schedule') }}", {
+          body: formData,
+          method: "post"
+        })
+          .then(res => res.json())
+          .then(res => {
+            console.log(res['id'])
+            event['id'] = res['id']
+            
+            delete_btn.disabled = false;
+            calendar.addEvent(event)
+          })
+      }, { once: true })
+    },
 
-          info.event.setProp("title", name.value)
-          info.event.setProp("classNames", ['item-' + type.value.toLowerCase()])
 
-          let formData = new FormData();
+    eventResize: function (info) {
+      let formData = new FormData();
 
-          formData.append('id', info.event['id']);
-          formData.append('start', info.event['start'].getTime());
-          formData.append('end', info.event['end'].getTime());
-          formData.append('description', info.event['title']);
-          formData.append('type', info.event['classNames'][0].replace("item-", "").toUpperCase());
+      formData.append('id', info.event['id']);
+      formData.append('start', info.event['start'].getTime());
+      formData.append('end', info.event['end'].getTime());
+      formData.append('description', info.event['title']);
+      formData.append('type', info.event['classNames'][0].replace("item-", "").toUpperCase());
 
-          name.value = ''
+      fetch("{{ url_for('dashboard.update_schedule') }}", {
+        body: formData,
+        method: "post"
+      })
+    },
 
-          fetch("{{ url_for('dashboard.update_schedule') }}", {
-            body: formData,
-            method: "post"
-          }).then(res => console.log(res.status))
-        }, { once: true })
+    eventDrop: function (info) {
+      let formData = new FormData();
 
-        document.querySelector('#delete').addEventListener('click', (event) => {
-          const name = document.querySelector('#description');
-          const type = document.querySelector('#schedule-type');
+      formData.append('id', info.event['id']);
+      formData.append('start', info.event['start'].getTime());
+      formData.append('end', info.event['end'].getTime());
+      formData.append('description', info.event['title']);
+      formData.append('type', info.event['classNames'][0].replace("item-", "").toUpperCase());
 
-          let formData = new FormData();
+      fetch("{{ url_for('dashboard.update_schedule') }}", {
+        body: formData,
+        method: "post"
+      })
+    },
 
-          name.value = ''
-        
-          formData.append('id', info.event['id']);
-          fetch("{{ url_for('dashboard.delete_schedule') }}", {
-            body: formData,
-            method: "post"
-          }).then(res => console.log(res.status))
+    eventClick: function (info) {
+      const name = document.querySelector('#description');
+      const type = document.querySelector('#schedule-type');
+      name.value = info.event.title;
+      type.value = info.event['classNames'][0].replace("item-", "").toUpperCase();
 
-          info.event.remove()
-        }, { once: true })
-      },
-    });
-    calendar.render();
-})
+      (new bootstrap.Modal('#scheduleModal', {})).show();
+      
+      const delete_btn = document.querySelector('#delete');
+      delete_btn.disabled = false;
+
+      document.querySelector('#add').addEventListener('click', (event) => {
+        const name = document.querySelector('#description');
+        const type = document.querySelector('#schedule-type');
+
+        if ((!name.value) || (!type.value)) {
+          return
+        }
+
+        info.event.setProp("title", name.value)
+        info.event.setProp("classNames", ['item-' + type.value.toLowerCase()])
+
+        let formData = new FormData();
+
+        formData.append('id', info.event['id']);
+        formData.append('start', info.event['start'].getTime());
+        formData.append('end', info.event['end'].getTime());
+        formData.append('description', info.event['title']);
+        formData.append('type', info.event['classNames'][0].replace("item-", "").toUpperCase());
+
+        name.value = ''
+
+        fetch("{{ url_for('dashboard.update_schedule') }}", {
+          body: formData,
+          method: "post"
+        }).then(res => console.log(res.status))
+      }, { once: true })
+
+      document.querySelector('#delete').addEventListener('click', (event) => {
+        const name = document.querySelector('#description');
+        const type = document.querySelector('#schedule-type');
+
+        let formData = new FormData();
+
+        name.value = ''
+      
+        formData.append('id', info.event['id']);
+        fetch("{{ url_for('dashboard.delete_schedule') }}", {
+          body: formData,
+          method: "post"
+        }).then(res => console.log(res.status))
+
+        info.event.remove()
+      }, { once: true })
+    },
+  });
+  calendar.render();
 </script>
 
 <style>

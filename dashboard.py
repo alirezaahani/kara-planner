@@ -21,27 +21,30 @@ dashboard = Blueprint("dashboard", __name__)
 @dashboard.route("/dashboard/get_schedules", methods=["GET"])
 @login_required
 def get_schedules():
-    today = datetime.date.today()
-    first = today.replace(day=1)
-    last_month = first - datetime.timedelta(days=1)
-    next_month = first + datetime.timedelta(days=32)
+    start = request.args.get('start', type=datetime.datetime.fromisoformat)
+    end = request.args.get('end', type=datetime.datetime.fromisoformat)
 
     schedules = (
         db.session.query(Schedule)
-        .filter(Schedule.start.between(last_month, next_month))
-        .filter(Schedule.end.between(last_month, next_month))
+        .filter(Schedule.start.between(start, end))
+        .filter(Schedule.end.between(start, end))
         .filter_by(user_id=current_user.id)
         .order_by(Schedule.start)
         .all()
     )
 
-    schedule_types = (
-        db.session.query(ScheduleType).filter_by(user_id=current_user.id).all()
-    )
+    data = [
+        {
+            'start': schedule.start.timestamp() * 1000,
+            'end': schedule.end.timestamp() * 1000,
+            'title': schedule.description,
+            'id': schedule.id,
+            'className': f'item-{schedule.type_id}',
+        }
+        for schedule in schedules
+    ]
 
-    return json.dumps(
-        {"schedules": schedules, "schedule_types": schedule_types}, cls=DataClassEncoder
-    )
+    return data
 
 
 @dashboard.route("/dashboard", methods=["GET"])

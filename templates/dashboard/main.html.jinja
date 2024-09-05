@@ -59,36 +59,27 @@
 
 
 <script>
-  fetch("{{ url_for("dashboard.get_schedules") }}").then(res => res.json()).then(server_data => { 
-    server_data = server_data['schedules'].map((entry) => {
-      return {
-        start: new Date(entry['start'] * 1000),
-        end: new Date(entry['end'] * 1000),
-        title: entry['description'],
-        id: entry['id'],
-        className: 'item-' + entry['type_id'],
-      }
-    })
 
-    var calendarEl = document.getElementById('calendar');
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-      initialView: 'timeGridDay',
-      locale: 'fa',
-      events: server_data,
-      slotDuration: '00:15:00',
-      themeSystem: 'bootstrap5',
-      nowIndicator: true,
-      allDaySlot: false,
-      aspectRatio: 2,
+  const calendarEl = document.getElementById('calendar');
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'timeGridDay',
+    locale: 'fa',
+    slotDuration: '00:15:00',
+    themeSystem: 'bootstrap5',
+    nowIndicator: true,
+    allDaySlot: false,
+    aspectRatio: 2,
 
-      headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-      },
-    });
-    calendar.render();
+    events: "{{ url_for("dashboard.get_schedules") }}",
+
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
   });
+
+  calendar.render();
 </script>
 
 
