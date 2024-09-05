@@ -63,7 +63,7 @@
     </thead>
     <tbody>
       {% for goal in week_goals %}
-      <tr>
+      <tr id="goal-row-{{ goal.id }}">
         <td>{{ goal.id }}</td>
         <td class="goal-deadlines" id="goal-{{ goal.id }}" goal-deadline="{{ goal.deadline }}">
         </td>
@@ -132,7 +132,17 @@
   })
 
   function remove(id) {
-    window.location.href = '{{ url_for("dashboard.delete_goal") }}?id=' + id
+    let formData = new FormData();
+    formData.append('id', id);
+
+    fetch("{{ url_for('dashboard.delete_goal') }}", {
+        body: formData,
+        method: "post"
+    }).then(res => res.json()).then(res => {
+        if (res.ok) {
+          document.getElementById('goal-row-' + id).style.display = 'none';
+        }
+    });
   }
 </script>
 {% endblock %}

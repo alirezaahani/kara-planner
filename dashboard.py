@@ -170,15 +170,15 @@ def update_goal():
     return redirect(url_for("dashboard.goals"))
 
 
-@dashboard.route("/dashboard/edit_goals/delete", methods=["GET"])
+@dashboard.route("/dashboard/edit_goals/delete", methods=["POST"])
 @login_required
 def delete_goal():
-    id = request.args.get("id").strip()
+    id = request.form.get("id", type=int)
 
     db.session.query(Goal).filter_by(user_id=current_user.id, id=id).delete()
     db.session.commit()
 
-    return redirect(url_for("dashboard.goals"))
+    return {'ok': True}
 
 
 @dashboard.route("/dashboard/grade_calculator", methods=["GET"])
