@@ -331,6 +331,8 @@ def import_ics():
         normalize_with_tz=NormalizationAction.CONVERT,
     )
 
+    default_type = db.session.query(ScheduleType).filter_by(user_id=current_user.id, description="unknown").one()
+
     events = []
     for event in calendar.events:
         desc = event.summary or "NO DESC"
@@ -339,7 +341,7 @@ def import_ics():
                 start=event.begin,
                 end=event.end,
                 description=desc,
-                type_id=1,
+                type_id=default_type.id,
                 user_id=current_user.id,
             )
         )
@@ -501,7 +503,7 @@ def update_schedule_type():
 def delete_schedule_type():
     id = int(request.form.get("id"))
 
-    default_type = db.session.query(ScheduleType).filter_by(description="unknown").one()
+    default_type = db.session.query(ScheduleType).filter_by(user_id=current_user.id, description="unknown").one()
 
     db.session.query(Schedule).filter_by(type_id=id).update(
         {"type_id": default_type.id}
@@ -559,7 +561,7 @@ def update_plan_type():
 def delete_plan_type():
     id = int(request.form.get("id"))
 
-    default_type = db.session.query(PlanType).filter_by(description="unknown").one()
+    default_type = db.session.query(PlanType).filter_by(user_id=current_user.id, description="unknown").one()
 
     db.session.query(Plan).filter_by(type_id=id).update({"type_id": default_type.id})
 
@@ -613,7 +615,7 @@ def update_exam_type():
 def delete_exam_type():
     id = int(request.form.get("id"))
 
-    default_type = db.session.query(ExamType).filter_by(description="unknown").one()
+    default_type = db.session.query(ExamType).filter_by(user_id=current_user.id, description="unknown").one()
 
     db.session.query(ExamResult).filter_by(type_id=id).update(
         {"type_id": default_type.id}
