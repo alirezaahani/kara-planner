@@ -100,9 +100,6 @@ def register_process():
 
         exam_types = [
             ExamType(description="unknown", color_hex="#ffffff", user_id=user.id),
-            ExamType(description="test", color_hex="#666DCB", user_id=user.id),
-            ExamType(description="quiz", color_hex="#3ABBC9", user_id=user.id),
-            ExamType(description="essay", color_hex="#9BCA3E", user_id=user.id),
         ]
 
         db.session.bulk_save_objects(schedule_types)

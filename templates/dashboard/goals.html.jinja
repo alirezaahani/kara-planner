@@ -127,10 +127,6 @@
     document.querySelector('#date').value = moment(date).locale('fa').format('YYYY/MM/DD hh:mm:ss')
   })
 
-  goalModal.addEventListener('hidden.bs.modal', event => {
-    dtp1Instance.clearDate();
-  })
-
   function remove(id) {
     let formData = new FormData();
     formData.append('id', id);

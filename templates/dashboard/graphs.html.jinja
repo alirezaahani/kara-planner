@@ -6,6 +6,10 @@
 {% block header %}نمودار های برنامه ریزی{% endblock %}
 
 {% block toolbar %}
+<!--<div class="input-group mb-3">
+  <label for="week" class="input-group-text col-form-label">هفته مورد نظر</label>
+  <input type="text" class="form-control" id="week" data-jdp required>
+</div>-->
 {% endblock %}
 
 {% block content %}
@@ -20,7 +24,78 @@
 {% endblock %}
 
 {% block code %}
+
+<!--<style>
+.jdp-day:nth-child(7n+1), .jdp-day:nth-child(7n+8) {
+  background-color: gray !important;
+}
+
+.highlightedWeek { 
+  background: rgba(0, 0, 0, .1) !important;
+  z-index: 1;
+}
+</style>-->
+
+<link rel="stylesheet" href="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.css">
+<script type="text/javascript" src="https://unpkg.com/@majidh1/jalalidatepicker/dist/jalalidatepicker.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!--
+<script>
+jalaliDatepicker.startWatch();
+jalaliDatepicker.updateOptions({
+  date: true,
+  zIndex: 10000,
+});
+
+const addDaysListener = () => {
+  const days = document.querySelectorAll('.jdp-day');
+  const weeks = document.querySelectorAll('.last-week');
+
+  const handleMouseEvent = (day, action) => {
+    for (let i = 0; i < weeks.length - 1; i++) {
+      const first = Array.from(weeks[i].parentElement.children).indexOf(weeks[i]);
+      const second = Array.from(weeks[i + 1].parentElement.children).indexOf(weeks[i + 1]);
+      const between = Array.from(weeks[i].parentElement.children).slice(first + 1, second + 1);
+
+      if (between.includes(day)) {
+        between.forEach(el => { el.classList[action]('highlightedWeek'); });
+        break;
+      }
+    }
+  };
+
+  for (let i = 0; i < weeks.length - 1; i++) {
+    const first = Array.from(weeks[i].parentElement.children).indexOf(weeks[i]);
+    const second = Array.from(weeks[i + 1].parentElement.children).indexOf(weeks[i + 1]);
+    const between = Array.from(weeks[i].parentElement.children).slice(first + 1, second + 1);
+    
+    if(Array.from(between).some(el => el.classList.contains('selected'))) {
+      between.forEach(el => { el.classList.add('selected'); });
+    } else {
+      between.forEach(el => { el.classList.remove('selected'); });
+    }
+  }
+
+  days.forEach(day => {
+    day.addEventListener('mouseover', () => handleMouseEvent(day, 'add'));
+    day.addEventListener('mouseout', () => handleMouseEvent(day, 'remove'));
+  });
+};
+
+const interval = setInterval(() => {
+  const element = document.querySelector('jdp-container');
+  if (element) {
+      clearInterval(interval);
+      addDaysListener();
+      const config = { childList: true };
+      const observer = new MutationObserver(addDaysListener);
+      observer.observe(element, config);
+  }
+}, 100);
+
+</script>
+-->
 
 <script>
   Chart.defaults.font.family = "Vazirmatn"

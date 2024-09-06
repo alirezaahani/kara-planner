@@ -130,6 +130,50 @@
       </div>
   </div>
 </div>
+
+
+<div class="accordion-item">
+  <h2 class="accordion-header" id="lessons-import">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+          data-bs-target="#collapse-lessons-import" aria-expanded="false" aria-controls="collapse-lessons-import">
+          افزودن دسته بندی های درسی (برای دبیرستان)
+      </button>
+  </h2>
+  <div id="collapse-lessons-import" class="accordion-collapse collapse" aria-labelledby="lessons-import"
+      data-bs-parent="#accordionPercentage">
+      <div class="accordion-body">
+          <div class="input-group mb-3">
+  
+      <div class="form-floating">
+        <label for="grade">مقطع تحصیلی</label>
+        <select class="form-select" aria-label="مقطع تحصیلی" id="grade">
+          <option value="10">دهم</option>
+          <option value="11">یازدهم</option>
+          <option value="12">دوازدهم</option>
+        </select>
+      </div>
+      
+      <div class="form-floating">
+        <label for="major">رشته</label>
+        <select class="form-select" aria-label="رشته" id="major">
+          <option value="shared">عمومی</option>
+          <option value="math">ریاضی - فیزیک</option>
+          <option value="bio">علوم تجربی</option>
+        </select>
+      </div>
+      
+      
+    </div>
+    <button class="w-100 btn btn-lg btn-primary" id="importLessons">تایید</button>
+
+    <div class="d-none align-items-center mt-3" id="loading-spinner-lessons">
+        <strong role="status">در حال بارگذاری ...</strong>
+        <div class="spinner-border ms-auto" aria-hidden="true"></div>
+    </div>
+      </div>
+  </div>
+</div>
+
 </div>
 {% endblock %}
 
@@ -168,6 +212,32 @@
           showAlert("ورود تقویم با موفقیت انجام شد.", "success")          
         } else {
           showAlert("لطفا آدرس فایل ics به درستی وارد کنید.", "danger")
+        }
+      })
+  }, { capture: true });
+
+
+
+  document.getElementById("importLessons").addEventListener("click", function (event) {   
+    event.preventDefault();
+    const grade = document.getElementById("grade").value;
+    const major = document.getElementById("major").value;
+    
+    document.getElementById("loading-spinner-lessons").classList.remove("d-none");
+    document.getElementById("loading-spinner-lessons").classList.add("d-flex");
+    event.target.disabled = true;
+    
+    fetch(`{{ url_for('dashboard.init_lessons') }}?grade=${grade}&major=${major}`)
+      .then(res => res.json())
+      .then(res => {
+        document.getElementById("loading-spinner-lessons").classList.add("d-none");
+        document.getElementById("loading-spinner-lessons").classList.remove("d-flex");
+        event.target.disabled = false;
+
+        if(res.ok) {
+          showAlert("با موفقیت انجام شد.", "success")          
+        } else {
+          showAlert("خطایی در افزودن رخ داد.", "danger")
         }
       })
   }, { capture: true });

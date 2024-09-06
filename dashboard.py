@@ -564,11 +564,10 @@ def update_plan_type():
 def delete_plan_type():
     id = int(request.form.get("id"))
 
-    default_type = db.session.query(PlanType).filter_by(user_id=current_user.id, description="unknown").one()
-
-    db.session.query(Plan).filter_by(type_id=id).update({"type_id": default_type.id})
-
+    # We can't merge plans now
+    db.session.query(Plan).filter_by(type_id=id).delete()
     db.session.query(PlanType).filter_by(user_id=current_user.id, id=id).delete()
+
     db.session.commit()
 
     return {"ok": True}
@@ -646,3 +645,86 @@ def add_exam_type():
     db.session.commit()
 
     return {"ok": True, "id": exam_type.id}
+
+import io
+import json
+
+import random
+import random
+
+def generate_random_color():
+    temperature = random.choice(["warm", "neutral", "cool"])
+
+    if temperature == "warm":
+        # Warm colors (orange, red, yellow)
+        r = random.randint(150, 255)
+        g = random.randint(50, 150)
+        b = random.randint(0, 50)
+    elif temperature == "neutral":
+        # Neutral colors (green, blue, purple)
+        r = random.randint(50, 150)
+        g = random.randint(50, 150)
+        b = random.randint(50, 150)
+    else:
+        # Cool colors (blue, purple, pink)
+        r = random.randint(0, 50)
+        g = random.randint(50, 150)
+        b = random.randint(150, 255)
+
+    r = max(0, min(255, r + random.randint(-20, 20)))
+    g = max(0, min(255, g + random.randint(-20, 20)))
+    b = max(0, min(255, b + random.randint(-20, 20)))
+
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+def calculate_contrast_color(color):
+    r = int(color[1:3], 16)
+    g = int(color[3:5], 16)
+    b = int(color[5:7], 16)
+
+    luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+
+    if luminance > 0.5:
+        return "#0c0c0c"
+    else:
+        return "#ededed"
+
+@dashboard.route("/dashboard/init_lessons", methods=["GET"])
+@login_required
+def init_lessons():
+    grade = request.args.get('grade', type=str, default="10")
+    major = request.args.get('major', type=str, default='math')
+
+    data = {}
+    with io.open('static/lessons.json', encoding='utf-8') as f:
+        data = json.load(f)
+
+    rows = []
+    for row in data[grade][major]:
+        bg_color = generate_random_color()
+        text_color = calculate_contrast_color(bg_color)
+
+        rows.append(PlanType(
+            description=row,
+            background_color_hex=bg_color,
+            text_color_hex=text_color,
+            user_id=current_user.id,
+        ))
+
+        rows.append(ExamType(
+            description=row,
+            user_id=current_user.id,
+            color_hex=bg_color
+        ))
+
+        rows.append(ScheduleType(
+            description=row,
+            background_color_hex=bg_color,
+            text_color_hex=text_color,
+            user_id=current_user.id,
+        ))
+    
+    db.session.bulk_save_objects(rows)
+    db.session.commit()
+
+    return {"ok": True}
