@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
 from models import (
     db,
@@ -16,7 +16,6 @@ import json
 import itertools
 
 dashboard = Blueprint("dashboard", __name__)
-
 
 @dashboard.route("/dashboard/get_schedules", methods=["GET"])
 @login_required
@@ -648,6 +647,7 @@ def add_exam_type():
 
 import io
 import json
+import os
 
 import random
 import random
@@ -696,7 +696,7 @@ def init_lessons():
     major = request.args.get('major', type=str, default='math')
 
     data = {}
-    with io.open('static/lessons.json', encoding='utf-8') as f:
+    with io.open(os.path.join(current_app.root_path, 'static', 'lessons.json'), encoding='utf-8') as f:
         data = json.load(f)
 
     rows = []
