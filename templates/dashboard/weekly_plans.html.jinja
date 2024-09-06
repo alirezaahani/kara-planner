@@ -46,6 +46,11 @@
 
 
 {% block code %}
+<style>
+td:not(.day-date) {
+  min-width: 10rem !important;
+}
+</style>
 <script>
   document.querySelectorAll('.day-date').forEach(el => {
     el.innerText = moment(new Date(el.getAttribute('data-date'))).locale('fa').format('YYYY/MM/DD')

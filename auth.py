@@ -89,22 +89,7 @@ def register_process():
             ),
         ]
 
-        plan_types = [
-            PlanType(
-                description="unknown",
-                background_color_hex="#222222",
-                text_color_hex="#ffffff",
-                user_id=user.id,
-            ),
-        ]
-
-        exam_types = [
-            ExamType(description="unknown", color_hex="#ffffff", user_id=user.id),
-        ]
-
         db.session.bulk_save_objects(schedule_types)
-        db.session.bulk_save_objects(exam_types)
-        db.session.bulk_save_objects(plan_types)
 
         db.session.commit()
 

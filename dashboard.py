@@ -460,14 +460,12 @@ def types():
     exam_types = (
         db.session.query(ExamType)
         .filter_by(user_id=current_user.id)
-        .filter(ExamType.description != "unknown")
         .all()
     )
 
     plan_types = (
         db.session.query(PlanType)
         .filter_by(user_id=current_user.id)
-        .filter(PlanType.description != "unknown")
         .all()
     )
 
@@ -564,7 +562,7 @@ def delete_plan_type():
     id = int(request.form.get("id"))
 
     # We can't merge plans now
-    db.session.query(Plan).filter_by(type_id=id).delete()
+    db.session.query(Plan).filter_by(user_id=current_user.id, type_id=id).delete()
     db.session.query(PlanType).filter_by(user_id=current_user.id, id=id).delete()
 
     db.session.commit()
@@ -616,12 +614,7 @@ def update_exam_type():
 def delete_exam_type():
     id = int(request.form.get("id"))
 
-    default_type = db.session.query(ExamType).filter_by(user_id=current_user.id, description="unknown").one()
-
-    db.session.query(ExamResult).filter_by(type_id=id).update(
-        {"type_id": default_type.id}
-    )
-
+    db.session.query(ExamResult).filter_by(user_id=current_user.id, type_id=id).delete()
     db.session.query(ExamType).filter_by(user_id=current_user.id, id=id).delete()
     db.session.commit()
 
